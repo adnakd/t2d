@@ -42,11 +42,10 @@ public:
   QtOfflineGLPBuffer(TDimension rasterSize);
   ~QtOfflineGLPBuffer();
 
-  void createContext(TDimension rasterSize);
-  void makeCurrent() override;
-  void doneCurrent() override;
-
-  void getRaster(TRaster32P raster) override;
+  void createContext(TDimension rasterSize, std::shared_ptr<TOfflineGL::Imp> shared = nullptr);
+  void makeCurrent();
+  void doneCurrent();
+  void getRaster(TRaster32P raster);
 };
 
 #endif
