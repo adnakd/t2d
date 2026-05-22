@@ -30,21 +30,21 @@ typedef PlasticDeformerDataGroup DataGroup;
 
 //----------------------------------------------------------------------------------
 
-typedef std::pair<const SkD *, int> DeformedSkeleton;
+typedef std::pair<const SkD*, int> DeformedSkeleton;
 
 //----------------------------------------------------------------------------------
 
 struct Key {
-  const TMeshImage *m_mi;
+  const TMeshImage* m_mi;
   DeformedSkeleton m_ds;
 
   std::shared_ptr<DataGroup> m_dataGroup;
 
 public:
-  Key(const TMeshImage *mi, const SkD *sd, int skelId)
+  Key(const TMeshImage* mi, const SkD* sd, int skelId)
       : m_mi(mi), m_ds(sd, skelId), m_dataGroup() {}
 
-  bool operator<(const Key &other) const {
+  bool operator<(const Key& other) const {
     return (m_mi < other.m_mi) ||
            ((!(other.m_mi < m_mi)) && (m_ds < other.m_ds));
   }
@@ -59,7 +59,7 @@ typedef boost::multi_index_container<
 
              ordered_unique<identity<Key>>,
              ordered_non_unique<tag<TMeshImage>,
-                                member<Key, const TMeshImage *, &Key::m_mi>>,
+                                member<Key, const TMeshImage*, &Key::m_mi>>,
              ordered_non_unique<tag<DeformedSkeleton>,
                                 member<Key, DeformedSkeleton, &Key::m_ds>>
 
@@ -78,14 +78,14 @@ typedef DeformersSet::index<DeformedSkeleton>::type DeformersByDeformedSkeleton;
 
 namespace {
 
-void initializeSO(PlasticDeformerData &data, const TTextureMeshP &mesh) {
+void initializeSO(PlasticDeformerData& data, const TTextureMeshP& mesh) {
   data.m_so.reset(new double[mesh->facesCount()]);
 }
 
 //----------------------------------------------------------------------------------
 
-void initializeDeformerData(PlasticDeformerData &data,
-                            const TTextureMeshP &mesh) {
+void initializeDeformerData(PlasticDeformerData& data,
+                            const TTextureMeshP& mesh) {
   initializeSO(data, mesh);  // Allocates SO data
 
   // Also, allocate suitable input-output arrays for the deformation
@@ -94,11 +94,11 @@ void initializeDeformerData(PlasticDeformerData &data,
 
 //----------------------------------------------------------------------------------
 
-void initializeDeformersData(DataGroup *group, const TMeshImage *meshImage) {
+void initializeDeformersData(DataGroup* group, const TMeshImage* meshImage) {
   group->m_datas.reset(new PlasticDeformerData[meshImage->meshes().size()]);
 
   // Push a PlasticDeformer for each mesh in the image
-  const std::vector<TTextureMeshP> &meshes = meshImage->meshes();
+  const std::vector<TTextureMeshP>& meshes = meshImage->meshes();
   int fTotal                               = 0;  // Also count total # of faces
 
   int m, mCount = meshes.size();
@@ -108,11 +108,11 @@ void initializeDeformersData(DataGroup *group, const TMeshImage *meshImage) {
   }
 
   // Initialize the vector of sorted faces
-  std::vector<std::pair<int, int>> &sortedFaces = group->m_sortedFaces;
+  std::vector<std::pair<int, int>>& sortedFaces = group->m_sortedFaces;
 
   sortedFaces.reserve(fTotal);
   for (m = 0; m != mCount; ++m) {
-    const TTextureMesh &mesh = *meshes[m];
+    const TTextureMesh& mesh = *meshes[m];
 
     int f, fCount = mesh.facesCount();
     for (f = 0; f != fCount; ++f) sortedFaces.push_back(std::make_pair(f, m));
@@ -127,7 +127,7 @@ void initializeDeformersData(DataGroup *group, const TMeshImage *meshImage) {
 
 namespace {
 
-void transformHandles(std::vector<PlasticHandle> &handles, const TAffine &aff) {
+void transformHandles(std::vector<PlasticHandle>& handles, const TAffine& aff) {
   // Transforms handles through deformAff AND applies mi's dpi scale inverse
   std::vector<PlasticHandle>::size_type h, hCount = handles.size();
   for (h = 0; h != hCount; ++h) handles[h].m_pos = aff * handles[h].m_pos;
@@ -135,7 +135,7 @@ void transformHandles(std::vector<PlasticHandle> &handles, const TAffine &aff) {
 
 //----------------------------------------------------------------------------------
 
-void transformHandles(std::vector<TPointD> &handles, const TAffine &aff) {
+void transformHandles(std::vector<TPointD>& handles, const TAffine& aff) {
   // Transforms handles through deformAff AND applies mi's dpi scale inverse
   std::vector<PlasticHandle>::size_type h, hCount = handles.size();
   for (h = 0; h != hCount; ++h) handles[h] = aff * handles[h];
@@ -143,12 +143,12 @@ void transformHandles(std::vector<TPointD> &handles, const TAffine &aff) {
 
 //----------------------------------------------------------------------------------
 
-void processHandles(DataGroup *group, double frame, const TMeshImage *meshImage,
-                    const SkD *sd, int skelId,
-                    const TAffine &deformationAffine) {
+void processHandles(DataGroup* group, double frame, const TMeshImage* meshImage,
+                    const SkD* sd, int skelId,
+                    const TAffine& deformationAffine) {
   assert(sd);
 
-  const PlasticSkeletonP &skeleton = sd->skeleton(skelId);
+  const PlasticSkeletonP& skeleton = sd->skeleton(skelId);
 
   if (!skeleton || skeleton->verticesCount() == 0) {
     group->m_handles.clear();
@@ -198,11 +198,11 @@ void processHandles(DataGroup *group, double frame, const TMeshImage *meshImage,
 
 namespace {
 
-bool updateHandlesSO(DataGroup *group, const SkD *sd, int skelId,
+bool updateHandlesSO(DataGroup* group, const SkD* sd, int skelId,
                      double frame) {
   assert(sd);
 
-  const PlasticSkeletonP &skeleton = sd->skeleton(skelId);
+  const PlasticSkeletonP& skeleton = sd->skeleton(skelId);
 
   if (!skeleton || skeleton->verticesCount() == 0) {
     group->m_soMin = group->m_soMax = 0.0;
@@ -221,12 +221,12 @@ bool updateHandlesSO(DataGroup *group, const SkD *sd, int skelId,
         skeleton->vertices().begin();
 
     for (h = 0; h != hCount; ++h, ++vt) {
-      const SkVD *vd = sd->vertexDeformation(vt->name());
+      const SkVD* vd = sd->vertexDeformation(vt->name());
       if (!vd) continue;
 
       double so = vd->m_params[SkVD::SO]->getValue(frame);
 
-      PlasticHandle &handle = group->m_handles[h];
+      PlasticHandle& handle = group->m_handles[h];
       if (handle.m_so != so) {
         group->m_handles[h].m_so = so;
         changed                  = true;
@@ -239,7 +239,7 @@ bool updateHandlesSO(DataGroup *group, const SkD *sd, int skelId,
     group->m_soMax = -(group->m_soMin = (std::numeric_limits<double>::max)());
 
     for (h = 0; h != hCount; ++h) {
-      const double &so = group->m_handles[h].m_so;
+      const double& so = group->m_handles[h].m_so;
 
       group->m_soMin = std::min(group->m_soMin, so);
       group->m_soMax = std::max(group->m_soMax, so);
@@ -251,15 +251,15 @@ bool updateHandlesSO(DataGroup *group, const SkD *sd, int skelId,
 
 //----------------------------------------------------------------------------------
 
-void interpolateSO(DataGroup *group, const TMeshImage *meshImage) {
+void interpolateSO(DataGroup* group, const TMeshImage* meshImage) {
   int m, mCount = meshImage->meshes().size();
 
   if (group->m_handles.size() == 0) {
     // No handles case, fill in with 0s
 
     for (m = 0; m != mCount; ++m) {
-      const TTextureMesh &mesh  = *meshImage->meshes()[m];
-      PlasticDeformerData &data = group->m_datas[m];
+      const TTextureMesh& mesh  = *meshImage->meshes()[m];
+      PlasticDeformerData& data = group->m_datas[m];
 
       std::fill(data.m_so.get(), data.m_so.get() + mesh.facesCount(), 0.0);
     }
@@ -269,8 +269,8 @@ void interpolateSO(DataGroup *group, const TMeshImage *meshImage) {
 
   // Apply handles' SO values to each mesh
   for (m = 0; m != mCount; ++m) {
-    const TTextureMesh &mesh  = *meshImage->meshes()[m];
-    PlasticDeformerData &data = group->m_datas[m];
+    const TTextureMesh& mesh  = *meshImage->meshes()[m];
+    PlasticDeformerData& data = group->m_datas[m];
 
     // Interpolate so values
     std::unique_ptr<double[]> verticesSO(new double[mesh.verticesCount()]);
@@ -292,27 +292,27 @@ void interpolateSO(DataGroup *group, const TMeshImage *meshImage) {
 //----------------------------------------------------------------------------------
 
 struct FaceLess {
-  const PlasticDeformerDataGroup *m_group;
+  const PlasticDeformerDataGroup* m_group;
 
 public:
-  FaceLess(const PlasticDeformerDataGroup *group) : m_group(group) {}
+  FaceLess(const PlasticDeformerDataGroup* group) : m_group(group) {}
 
-  bool operator()(const std::pair<int, int> &a, const std::pair<int, int> &b) {
+  bool operator()(const std::pair<int, int>& a, const std::pair<int, int>& b) {
     return (m_group->m_datas[a.second].m_so[a.first] <
             m_group->m_datas[b.second].m_so[b.first]);
   }
 };
 
 // Must be invoked after updateSO
-void updateSortedFaces(PlasticDeformerDataGroup *group) {
+void updateSortedFaces(PlasticDeformerDataGroup* group) {
   FaceLess comp(group);
   std::sort(group->m_sortedFaces.begin(), group->m_sortedFaces.end(), comp);
 }
 
 //----------------------------------------------------------------------------------
 
-void processSO(DataGroup *group, double frame, const TMeshImage *meshImage,
-               const SkD *sd, int skelId, const TAffine &deformationAffine) {
+void processSO(DataGroup* group, double frame, const TMeshImage* meshImage,
+               const SkD* sd, int skelId, const TAffine& deformationAffine) {
   // SO re-interpolate values along the mesh if either:
   //  1. Recompilation was requested (ie some vertex may have been
   //  added/removed)
@@ -344,15 +344,15 @@ void processSO(DataGroup *group, double frame, const TMeshImage *meshImage,
 
 namespace {
 
-void processMesh(DataGroup *group, double frame, const TMeshImage *meshImage,
-                 const SkD *sd, int skelId, const TAffine &deformationAffine) {
+void processMesh(DataGroup* group, double frame, const TMeshImage* meshImage,
+                 const SkD* sd, int skelId, const TAffine& deformationAffine) {
   if (!(group->m_upToDate & PlasticDeformerStorage::MESH)) {
     int m, mCount = meshImage->meshes().size();
 
     if (!(group->m_compiled & PlasticDeformerStorage::MESH)) {
       for (m = 0; m != mCount; ++m) {
-        const TTextureMeshP &mesh = meshImage->meshes()[m];
-        PlasticDeformerData &data = group->m_datas[m];
+        const TTextureMeshP& mesh = meshImage->meshes()[m];
+        PlasticDeformerData& data = group->m_datas[m];
 
         data.m_deformer.initialize(mesh);
         data.m_deformer.compile(
@@ -364,11 +364,11 @@ void processMesh(DataGroup *group, double frame, const TMeshImage *meshImage,
       group->m_compiled |= PlasticDeformerStorage::MESH;
     }
 
-    const TPointD *dstHandlePos =
+    const TPointD* dstHandlePos =
         group->m_dstHandles.empty() ? 0 : &group->m_dstHandles.front();
 
     for (m = 0; m != mCount; ++m) {
-      PlasticDeformerData &data = group->m_datas[m];
+      PlasticDeformerData& data = group->m_datas[m];
       data.m_deformer.deform(dstHandlePos, data.m_output.get());
     }
 
@@ -415,7 +415,7 @@ public:
                              //! deformation, and affine.
 
 public:
-  Imp() : m_mutex(QMutex::Recursive) {}
+  Imp() {}
 };
 
 //***********************************************************************************************
@@ -430,15 +430,15 @@ PlasticDeformerStorage::~PlasticDeformerStorage() {}
 
 //----------------------------------------------------------------------------------
 
-PlasticDeformerStorage *PlasticDeformerStorage::instance() {
+PlasticDeformerStorage* PlasticDeformerStorage::instance() {
   static PlasticDeformerStorage theInstance;
   return &theInstance;
 }
 
 //----------------------------------------------------------------------------------
 
-PlasticDeformerDataGroup *PlasticDeformerStorage::deformerData(
-    const TMeshImage *meshImage, const PlasticSkeletonDeformation *deformation,
+PlasticDeformerDataGroup* PlasticDeformerStorage::deformerData(
+    const TMeshImage* meshImage, const PlasticSkeletonDeformation* deformation,
     int skelId) {
   QMutexLocker locker(&m_imp->m_mutex);
 
@@ -459,13 +459,13 @@ PlasticDeformerDataGroup *PlasticDeformerStorage::deformerData(
 
 //----------------------------------------------------------------------------------
 
-const PlasticDeformerDataGroup *PlasticDeformerStorage::process(
-    double frame, const TMeshImage *meshImage,
-    const PlasticSkeletonDeformation *deformation, int skelId,
-    const TAffine &skeletonAffine, DataType dataType) {
+const PlasticDeformerDataGroup* PlasticDeformerStorage::process(
+    double frame, const TMeshImage* meshImage,
+    const PlasticSkeletonDeformation* deformation, int skelId,
+    const TAffine& skeletonAffine, DataType dataType) {
   QMutexLocker locker(&m_imp->m_mutex);
 
-  PlasticDeformerDataGroup *group =
+  PlasticDeformerDataGroup* group =
       deformerData(meshImage, deformation, skelId);
 
   // On-the-fly checks for data invalidation
@@ -500,11 +500,11 @@ const PlasticDeformerDataGroup *PlasticDeformerStorage::process(
 
 //----------------------------------------------------------------------------------
 
-const PlasticDeformerDataGroup *PlasticDeformerStorage::processOnce(
-    double frame, const TMeshImage *meshImage,
-    const PlasticSkeletonDeformation *deformation, int skelId,
-    const TAffine &skeletonAffine, DataType dataType) {
-  PlasticDeformerDataGroup *group = new PlasticDeformerDataGroup;
+const PlasticDeformerDataGroup* PlasticDeformerStorage::processOnce(
+    double frame, const TMeshImage* meshImage,
+    const PlasticSkeletonDeformation* deformation, int skelId,
+    const TAffine& skeletonAffine, DataType dataType) {
+  PlasticDeformerDataGroup* group = new PlasticDeformerDataGroup;
   initializeDeformersData(group, meshImage);
 
   bool doMesh    = (dataType & MESH);
@@ -527,11 +527,11 @@ const PlasticDeformerDataGroup *PlasticDeformerStorage::processOnce(
 
 //----------------------------------------------------------------------------------
 
-void PlasticDeformerStorage::invalidateMeshImage(const TMeshImage *meshImage,
+void PlasticDeformerStorage::invalidateMeshImage(const TMeshImage* meshImage,
                                                  int recompiledData) {
   QMutexLocker locker(&m_imp->m_mutex);
 
-  DeformersByMeshImage &deformers = m_imp->m_deformers.get<TMeshImage>();
+  DeformersByMeshImage& deformers = m_imp->m_deformers.get<TMeshImage>();
 
   DeformersByMeshImage::iterator dBegin(deformers.lower_bound(meshImage));
   if (dBegin == deformers.end()) return;
@@ -549,13 +549,13 @@ void PlasticDeformerStorage::invalidateMeshImage(const TMeshImage *meshImage,
 //----------------------------------------------------------------------------------
 
 void PlasticDeformerStorage::invalidateSkeleton(
-    const PlasticSkeletonDeformation *deformation, int skelId,
+    const PlasticSkeletonDeformation* deformation, int skelId,
     int recompiledData) {
   QMutexLocker locker(&m_imp->m_mutex);
 
   DeformedSkeleton ds(deformation, skelId);
 
-  DeformersByDeformedSkeleton &deformers =
+  DeformersByDeformedSkeleton& deformers =
       m_imp->m_deformers.get<DeformedSkeleton>();
 
   DeformersByDeformedSkeleton::iterator dBegin(deformers.lower_bound(ds));
@@ -574,10 +574,10 @@ void PlasticDeformerStorage::invalidateSkeleton(
 //----------------------------------------------------------------------------------
 
 void PlasticDeformerStorage::invalidateDeformation(
-    const PlasticSkeletonDeformation *deformation, int recompiledData) {
+    const PlasticSkeletonDeformation* deformation, int recompiledData) {
   QMutexLocker locker(&m_imp->m_mutex);
 
-  DeformersByDeformedSkeleton &deformers =
+  DeformersByDeformedSkeleton& deformers =
       m_imp->m_deformers.get<DeformedSkeleton>();
 
   DeformedSkeleton dsBegin(deformation, -(std::numeric_limits<int>::max)()),
@@ -599,10 +599,10 @@ void PlasticDeformerStorage::invalidateDeformation(
 
 //----------------------------------------------------------------------------------
 
-void PlasticDeformerStorage::releaseMeshData(const TMeshImage *meshImage) {
+void PlasticDeformerStorage::releaseMeshData(const TMeshImage* meshImage) {
   QMutexLocker locker(&m_imp->m_mutex);
 
-  DeformersByMeshImage &deformers = m_imp->m_deformers.get<TMeshImage>();
+  DeformersByMeshImage& deformers = m_imp->m_deformers.get<TMeshImage>();
 
   DeformersByMeshImage::iterator dBegin(deformers.lower_bound(meshImage));
   if (dBegin == deformers.end()) return;
@@ -612,13 +612,13 @@ void PlasticDeformerStorage::releaseMeshData(const TMeshImage *meshImage) {
 
 //----------------------------------------------------------------------------------
 
-void PlasticDeformerStorage::releaseSkeletonData(const SkD *deformation,
+void PlasticDeformerStorage::releaseSkeletonData(const SkD* deformation,
                                                  int skelId) {
   QMutexLocker locker(&m_imp->m_mutex);
 
   DeformedSkeleton ds(deformation, skelId);
 
-  DeformersByDeformedSkeleton &deformers =
+  DeformersByDeformedSkeleton& deformers =
       m_imp->m_deformers.get<DeformedSkeleton>();
 
   DeformersByDeformedSkeleton::iterator dBegin(deformers.lower_bound(ds));
@@ -629,10 +629,10 @@ void PlasticDeformerStorage::releaseSkeletonData(const SkD *deformation,
 
 //----------------------------------------------------------------------------------
 
-void PlasticDeformerStorage::releaseDeformationData(const SkD *deformation) {
+void PlasticDeformerStorage::releaseDeformationData(const SkD* deformation) {
   QMutexLocker locker(&m_imp->m_mutex);
 
-  DeformersByDeformedSkeleton &deformers =
+  DeformersByDeformedSkeleton& deformers =
       m_imp->m_deformers.get<DeformedSkeleton>();
 
   DeformedSkeleton dsBegin(deformation, -(std::numeric_limits<int>::max)()),

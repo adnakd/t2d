@@ -13,17 +13,17 @@ namespace {
 
 // singleton
 class StencilControlManager {
-  QThreadStorage<TStencilControl *> m_storage;
+  QThreadStorage<TStencilControl*> m_storage;
 
   StencilControlManager() {}
 
 public:
-  static StencilControlManager *instance() {
+  static StencilControlManager* instance() {
     static StencilControlManager theInstance;
     return &theInstance;
   }
 
-  TStencilControl *getCurrentStencilControl() {
+  TStencilControl* getCurrentStencilControl() {
     if (!m_storage.hasLocalData()) {
       m_storage.setLocalData(new TStencilControl);
     }
@@ -34,7 +34,7 @@ public:
   ~StencilControlManager() {}
 };
 
-}  // Local namespace
+}  // namespace
 
 //-----------------------------------------------------------------------------------------
 
@@ -46,9 +46,9 @@ public:
   // 0 is the first bit plane ; -1 means no stencil mask is writing
 
   int m_virtualState;
-// the state of the (eventually virtual) top mask.
-// A mask is virtual if overflows stencil buffer
-// 0 is closed and disabled, 1 closed and enabled and 2 is opened
+  // the state of the (eventually virtual) top mask.
+  // A mask is virtual if overflows stencil buffer
+  // 0 is closed and disabled, 1 closed and enabled and 2 is opened
 
 #ifdef _DEBUG
   std::stack<bool> fullState;
@@ -70,7 +70,7 @@ public:
 
   Imp();
 
-  void copy(Imp *src);
+  void copy(Imp* src);
   void resetMask();
 
   void updateOpenGlState();
@@ -115,7 +115,7 @@ TStencilControl::Imp::Imp()
     , m_drawOnScreenMask(0)
     , m_drawOnlyOnceMask(0)
     , m_virtualState(0) {
-  glGetIntegerv(GL_STENCIL_BITS, (GLint *)&m_stencilBitCount);
+  glGetIntegerv(GL_STENCIL_BITS, (GLint*)&m_stencilBitCount);
 
   glStencilMask(0xFFFFFFFF);
   // glClearStencil(0);
@@ -124,7 +124,7 @@ TStencilControl::Imp::Imp()
 
 //---------------------------------------------------------
 
-void TStencilControl::Imp::copy(Imp *src) {
+void TStencilControl::Imp::copy(Imp* src) {
   m_stencilBitCount  = src->m_stencilBitCount;
   m_pushCount        = src->m_pushCount;
   m_currentWriting   = src->m_currentWriting;
@@ -152,14 +152,14 @@ void TStencilControl::Imp::resetMask() {
 
 //---------------------------------------------------------
 
-TStencilControl *TStencilControl::instance() {
-  StencilControlManager *instance = StencilControlManager::instance();
+TStencilControl* TStencilControl::instance() {
+  StencilControlManager* instance = StencilControlManager::instance();
   return instance->getCurrentStencilControl();
 }
 
 //---------------------------------------------------------
 
-TStencilControl::TStencilControl() : m_imp(new Imp) { m_impStack.empty(); }
+TStencilControl::TStencilControl() : m_imp(new Imp) {}
 
 //---------------------------------------------------------
 
@@ -401,7 +401,7 @@ bool TStencilControl::isMaskEnabled() { return m_imp->m_virtualState > 0; }
 //---------------------------------------------------------
 
 void TStencilControl::stashMask() {
-  Imp *currentImp = new Imp;
+  Imp* currentImp = new Imp;
   currentImp->copy(m_imp.get());
   m_impStack.push(currentImp);
 

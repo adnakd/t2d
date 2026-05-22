@@ -43,58 +43,25 @@ bool DVAPI isMainThread();
 class DVAPI Message {
 public:
   Message();
-  virtual ~Message(){};
-  virtual Message *clone() const = 0;
+  virtual ~Message() {};
+  virtual Message* clone() const = 0;
   virtual void onDeliver()       = 0;
 
   void send();
   void sendBlocking();
 };
 
-#ifdef TNZCORE_LIGHT
-
-class DVAPI Mutex {
+class DVAPI Mutex final : public QRecursiveMutex {
 public:
-  HANDLE m_mutex;
-  Mutex() { m_mutex = CreateMutex(NULL, FALSE, NULL); }
-  ~Mutex() { CloseHandle(m_mutex); }
-  void lock() {
-    WaitForSingleObject(m_mutex,  // handle to mutex
-                        INFINITE);
-  }
-  void unlock() { ReleaseMutex(m_mutex); }
+  Mutex() {}
 
 private:
   // not implemented
-  Mutex(const Mutex &);
-  Mutex &operator=(const Mutex &);
-};
-
-class DVAPI MutexLocker {
-  HANDLE m_mutex;
-
-public:
-  MutexLocker(Mutex *mutex) : m_mutex(mutex->m_mutex) {
-    WaitForSingleObject(m_mutex, INFINITE);
-  }
-  ~MutexLocker() { ReleaseMutex(m_mutex); }
-};
-
-#else
-
-class DVAPI Mutex final : public QMutex {
-public:
-  Mutex() : QMutex(QMutex::Recursive) {}
-
-private:
-  // not implemented
-  Mutex(const Mutex &);
-  Mutex &operator=(const Mutex &);
+  Mutex(const Mutex&);
+  Mutex& operator=(const Mutex&);
 };
 
 typedef QMutexLocker MutexLocker;
-
-#endif
 
 }  // namespace  TThread
 

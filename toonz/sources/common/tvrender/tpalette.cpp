@@ -31,7 +31,7 @@ DEFINE_CLASS_CODE(TPalette, 30)
 
 namespace {
 
-const std::string pointToString(const TColorStyle::PickedPosition &point) {
+const std::string pointToString(const TColorStyle::PickedPosition& point) {
   if (point.frame == 0)
     return std::to_string(point.pos.x) + "," + std::to_string(point.pos.y);
   else
@@ -40,7 +40,7 @@ const std::string pointToString(const TColorStyle::PickedPosition &point) {
 }
 
 // splitting string with ','
-const TColorStyle::PickedPosition stringToPoint(const std::string &string) {
+const TColorStyle::PickedPosition stringToPoint(const std::string& string) {
   std::string buffer;
   std::stringstream ss(string);
   std::vector<std::string> result;
@@ -57,7 +57,7 @@ const TColorStyle::PickedPosition stringToPoint(const std::string &string) {
 }
 
 // convert refLevelFids to string for saving
-std::string fidsToString(const std::vector<TFrameId> &fids) {
+std::string fidsToString(const std::vector<TFrameId>& fids) {
   std::string str;
   QList<int> numList;
 
@@ -92,9 +92,9 @@ std::string fidsToString(const std::vector<TFrameId> &fids) {
 // convert loaded string to refLevelFids
 std::vector<TFrameId> strToFids(std::string fidsStr) {
   std::vector<TFrameId> ret;
-  QString str = QString::fromStdString(fidsStr);
+  QString str        = QString::fromStdString(fidsStr);
   QStringList chunks = str.split(',', Qt::SkipEmptyParts);
-  for (const auto &chunk : chunks) {
+  for (const auto& chunk : chunks) {
     QStringList nums = chunk.split('-', Qt::SkipEmptyParts);
     assert(nums.count() > 0 && nums.count() <= 2);
     if (nums.count() == 1)
@@ -121,7 +121,7 @@ TPalette::Page::Page(std::wstring name)
 
 //-------------------------------------------------------------------
 
-TColorStyle *TPalette::Page::getStyle(int index) const {
+TColorStyle* TPalette::Page::getStyle(int index) const {
   assert(m_palette);
   if (0 <= index && index < getStyleCount())
     return m_palette->getStyle(m_styleIds[index]);
@@ -153,7 +153,7 @@ int TPalette::Page::addStyle(int styleId) {
 
 //-------------------------------------------------------------------
 
-int TPalette::Page::addStyle(TColorStyle *style) {
+int TPalette::Page::addStyle(TColorStyle* style) {
   assert(m_palette);
   int stylesCount = int(m_palette->m_styles.size());
   int styleId;
@@ -186,7 +186,7 @@ void TPalette::Page::insertStyle(int indexInPage, int styleId) {
 
 //-------------------------------------------------------------------
 
-void TPalette::Page::insertStyle(int indexInPage, TColorStyle *style) {
+void TPalette::Page::insertStyle(int indexInPage, TColorStyle* style) {
   assert(m_palette);
   int styleId = m_palette->addStyle(style);
   if (styleId >= 0) insertStyle(indexInPage, styleId);
@@ -229,7 +229,7 @@ int TPalette::Page::search(int styleId) const {
 
 //-------------------------------------------------------------------
 
-int TPalette::Page::search(TColorStyle *style) const {
+int TPalette::Page::search(TColorStyle* style) const {
   assert(style);
   assert(m_palette);
   for (int i = 0; i < getStyleCount(); i++)
@@ -248,7 +248,6 @@ TPalette::TPalette()
     , m_isCleanupPalette(false)
     , m_currentFrame(-1)
     , m_dirtyFlag(false)
-    , m_mutex(QMutex::Recursive)
     , m_isLocked(false)
     , m_askOverwriteFlag(false)
     , m_shortcutScopeIndex(0)
@@ -257,7 +256,7 @@ TPalette::TPalette()
     , m_defaultPaletteType(UNKNOWN_XSHLEVEL) {
   QString tempName(QObject::tr("colors"));
   std::wstring pageName = tempName.toStdWString();
-  Page *page            = addPage(pageName);
+  Page* page            = addPage(pageName);
   page->addStyle(TPixel32(255, 255, 255, 0));
   page->addStyle(TPixel32(0, 0, 0, 255));
   getStyle(0)->setName(L"color_0");
@@ -269,7 +268,7 @@ TPalette::TPalette()
 //-------------------------------------------------------------------
 
 TPalette::~TPalette() {
-  std::set<TColorStyle *> table;
+  std::set<TColorStyle*> table;
   int i = 0;
   for (i = 0; i < getStyleCount(); i++) {
     assert(table.find(getStyle(i)) == table.end());
@@ -280,19 +279,19 @@ TPalette::~TPalette() {
 
 //-------------------------------------------------------------------
 
-TPalette *TPalette::clone() const {
-  TPalette *palette = new TPalette;
+TPalette* TPalette::clone() const {
+  TPalette* palette = new TPalette;
   if (this && this->m_styles.size() > 0) palette->assign(this);
   return palette;
 }
 
 //-------------------------------------------------------------------
 
-TColorStyle *TPalette::getStyle(int index) const {
+TColorStyle* TPalette::getStyle(int index) const {
   if (0 <= index && index < getStyleCount())
     return m_styles[index].second.getPointer();
   else {
-    static TSolidColorStyle *ss = new TSolidColorStyle(TPixel32::Red);
+    static TSolidColorStyle* ss = new TSolidColorStyle(TPixel32::Red);
     ss->addRef();
     return ss;
   }
@@ -327,7 +326,7 @@ int TPalette::getFirstUnpagedStyle() const {
 /*! Adding style with new styleId. Even if there are deleted styles in the
  * palette, the new style will be appended to the end of the list.
  */
-int TPalette::addStyle(TColorStyle *style) {
+int TPalette::addStyle(TColorStyle* style) {
   // limit the number of cleanup style to 7
   if (isCleanupPalette() && getStyleInPagesCount() >= 8) return -1;
 
@@ -338,7 +337,7 @@ int TPalette::addStyle(TColorStyle *style) {
     for (i = 0; i < styleId; i++)
       if (getStyle(i) == style) break;
     if (i == styleId) {
-      m_styles.push_back(std::make_pair((Page *)0, style));
+      m_styles.push_back(std::make_pair((Page*)0, style));
       return styleId;
     }
   }
@@ -348,13 +347,13 @@ int TPalette::addStyle(TColorStyle *style) {
 
 //-------------------------------------------------------------------
 
-int TPalette::addStyle(const TPixel32 &color) {
+int TPalette::addStyle(const TPixel32& color) {
   return addStyle(new TSolidColorStyle(color));
 }
 
 //-------------------------------------------------------------------
 
-void TPalette::setStyle(int styleId, TColorStyle *style) {
+void TPalette::setStyle(int styleId, TColorStyle* style) {
   std::unique_ptr<TColorStyle> styleOwner(style);
 
   int styleCount = getStyleCount();
@@ -375,7 +374,7 @@ void TPalette::setStyle(int styleId, TColorStyle *style) {
 
 //-------------------------------------------------------------------
 
-void TPalette::setStyle(int styleId, const TPixelRGBM32 &color) {
+void TPalette::setStyle(int styleId, const TPixelRGBM32& color) {
   setStyle(styleId, new TSolidColorStyle(color));
 }
 
@@ -395,9 +394,9 @@ int TPalette::getPageCount() const { return int(m_pages.size()); }
 
 //-------------------------------------------------------------------
 
-TPalette::Page *TPalette::getPage(int pageIndex) {
+TPalette::Page* TPalette::getPage(int pageIndex) {
   if (0 <= pageIndex && pageIndex < getPageCount()) {
-    Page *page = m_pages[pageIndex];
+    Page* page = m_pages[pageIndex];
     assert(page->getIndex() == pageIndex);
     assert(page->m_palette == this);
     return page;
@@ -407,9 +406,9 @@ TPalette::Page *TPalette::getPage(int pageIndex) {
 
 //-------------------------------------------------------------------
 
-const TPalette::Page *TPalette::getPage(int pageIndex) const {
+const TPalette::Page* TPalette::getPage(int pageIndex) const {
   if (0 <= pageIndex && pageIndex < getPageCount()) {
-    Page *page = m_pages[pageIndex];
+    Page* page = m_pages[pageIndex];
     assert(page->getIndex() == pageIndex);
     assert(page->m_palette == this);
     return page;
@@ -419,8 +418,8 @@ const TPalette::Page *TPalette::getPage(int pageIndex) const {
 
 //-------------------------------------------------------------------
 
-TPalette::Page *TPalette::addPage(std::wstring name) {
-  Page *page      = new Page(name);
+TPalette::Page* TPalette::addPage(std::wstring name) {
+  Page* page      = new Page(name);
   page->m_index   = getPageCount();
   page->m_palette = this;
   m_pages.push_back(page);
@@ -430,20 +429,20 @@ TPalette::Page *TPalette::addPage(std::wstring name) {
 //-------------------------------------------------------------------
 
 void TPalette::erasePage(int index) {
-  Page *page = getPage(index);
+  Page* page = getPage(index);
   if (!page) return;
   m_pages.erase(m_pages.begin() + index);
   int i;
   for (i = 0; i < getPageCount(); i++) m_pages[i]->m_index = i;
-  for (i                                = 0; i < page->getStyleCount(); i++)
+  for (i = 0; i < page->getStyleCount(); i++)
     m_styles[page->getStyleId(i)].first = 0;
-  page->m_palette                       = 0;
+  page->m_palette = 0;
   delete page;
 }
 
 //-------------------------------------------------------------------
 
-void TPalette::movePage(Page *page, int dstPageIndex) {
+void TPalette::movePage(Page* page, int dstPageIndex) {
   assert(page);
   assert(page->m_palette == this);
   dstPageIndex = tcrop(dstPageIndex, 0, getPageCount() - 1);
@@ -456,7 +455,7 @@ void TPalette::movePage(Page *page, int dstPageIndex) {
 
 //-------------------------------------------------------------------
 
-TPalette::Page *TPalette::getStylePage(int styleId) const {
+TPalette::Page* TPalette::getStylePage(int styleId) const {
   if (0 <= styleId && styleId < getStyleCount())
     return m_styles[styleId].first;
   else
@@ -465,9 +464,9 @@ TPalette::Page *TPalette::getStylePage(int styleId) const {
 
 //-------------------------------------------------------------------
 
-int TPalette::getClosestStyle(const TPixel32 &color) const {
+int TPalette::getClosestStyle(const TPixel32& color) const {
   struct locals {
-    static inline int getDistance2(const TPixel32 &a, const TPixel32 &b) {
+    static inline int getDistance2(const TPixel32& a, const TPixel32& b) {
       return (a.r - b.r) * (a.r - b.r) + (a.g - b.g) * (a.g - b.g) +
              (a.b - b.b) * (a.b - b.b) + (a.m - b.m) * (a.m - b.m);
     }
@@ -478,8 +477,8 @@ int TPalette::getClosestStyle(const TPixel32 &color) const {
   int bestDistance = 255 * 255 * 4 + 1;
   for (int i = 1; i < (int)m_styles.size(); i++) {
     // if(i==FirstUserStyle+2) continue;
-    TSolidColorStyle *scs =
-        dynamic_cast<TSolidColorStyle *>(m_styles[i].second.getPointer());
+    TSolidColorStyle* scs =
+        dynamic_cast<TSolidColorStyle*>(m_styles[i].second.getPointer());
     if (scs) {
       int d = locals::getDistance2(scs->getMainColor(), color);
       if (d < bestDistance) {
@@ -493,7 +492,7 @@ int TPalette::getClosestStyle(const TPixel32 &color) const {
 
 //-------------------------------------------------------------------
 
-bool TPalette::getFxRects(const TRect &rect, TRect &rectIn, TRect &rectOut) {
+bool TPalette::getFxRects(const TRect& rect, TRect& rectIn, TRect& rectOut) {
   int i;
   bool ret = false;
   int borderIn, borderOut, fullBorderIn = 0, fullBorderOut = 0;
@@ -521,39 +520,39 @@ bool TPalette::getFxRects(const TRect &rect, TRect &rectIn, TRect &rectOut) {
 namespace {
 
 class StyleWriter final : public TOutputStreamInterface {
-  TOStream &m_os;
+  TOStream& m_os;
   int m_index;
 
 public:
   static TFilePath m_rootDir;
-  StyleWriter(TOStream &os, int index) : m_os(os), m_index(index) {}
-  static void setRootDir(const TFilePath &fp) { m_rootDir = fp; }
+  StyleWriter(TOStream& os, int index) : m_os(os), m_index(index) {}
+  static void setRootDir(const TFilePath& fp) { m_rootDir = fp; }
 
-  TOutputStreamInterface &operator<<(double x) override {
+  TOutputStreamInterface& operator<<(double x) override {
     m_os << x;
     return *this;
   };
-  TOutputStreamInterface &operator<<(int x) override {
+  TOutputStreamInterface& operator<<(int x) override {
     m_os << x;
     return *this;
   };
-  TOutputStreamInterface &operator<<(std::string x) override {
+  TOutputStreamInterface& operator<<(std::string x) override {
     m_os << x;
     return *this;
   };
-  TOutputStreamInterface &operator<<(UCHAR x) override {
+  TOutputStreamInterface& operator<<(UCHAR x) override {
     m_os << (int)x;
     return *this;
   };
-  TOutputStreamInterface &operator<<(USHORT x) override {
+  TOutputStreamInterface& operator<<(USHORT x) override {
     m_os << (int)x;
     return *this;
   };
-  TOutputStreamInterface &operator<<(const TPixel32 &x) override {
+  TOutputStreamInterface& operator<<(const TPixel32& x) override {
     m_os << x;
     return *this;
   };
-  TOutputStreamInterface &operator<<(const TRaster32P &ras) override {
+  TOutputStreamInterface& operator<<(const TRaster32P& ras) override {
     assert(m_rootDir != TFilePath());
 
     std::string name = "texture_" + std::to_string(m_index);
@@ -574,48 +573,48 @@ public:
 //-------------------------------------------------------------------
 
 class StyleReader final : public TInputStreamInterface {
-  TIStream &m_is;           //!< Wrapped input stream.
+  TIStream& m_is;           //!< Wrapped input stream.
   VersionNumber m_version;  //!< Palette version number (overrides m_is's one).
 
 public:
   static TFilePath m_rootDir;
 
 public:
-  StyleReader(TIStream &is, const VersionNumber &version)
+  StyleReader(TIStream& is, const VersionNumber& version)
       : m_is(is), m_version(version) {}
 
-  static void setRootDir(const TFilePath &fp) { m_rootDir = fp; }
+  static void setRootDir(const TFilePath& fp) { m_rootDir = fp; }
 
-  TInputStreamInterface &operator>>(double &x) override {
+  TInputStreamInterface& operator>>(double& x) override {
     m_is >> x;
     return *this;
   }
 
-  TInputStreamInterface &operator>>(int &x) override {
+  TInputStreamInterface& operator>>(int& x) override {
     m_is >> x;
     return *this;
   }
 
-  TInputStreamInterface &operator>>(std::string &x) override {
+  TInputStreamInterface& operator>>(std::string& x) override {
     m_is >> x;
     return *this;
   }
 
-  TInputStreamInterface &operator>>(UCHAR &x) override {
+  TInputStreamInterface& operator>>(UCHAR& x) override {
     int v;
     m_is >> v;
     x = v;
     return *this;
   }
 
-  TInputStreamInterface &operator>>(USHORT &x) override {
+  TInputStreamInterface& operator>>(USHORT& x) override {
     int v;
     m_is >> v;
     x = v;
     return *this;
   }
 
-  TInputStreamInterface &operator>>(TRaster32P &x) override {
+  TInputStreamInterface& operator>>(TRaster32P& x) override {
     assert(m_rootDir != TFilePath());
     std::string name;
     m_is >> name;
@@ -627,7 +626,7 @@ public:
     return *this;
   }
 
-  TInputStreamInterface &operator>>(TPixel32 &x) override {
+  TInputStreamInterface& operator>>(TPixel32& x) override {
     m_is >> x;
     return *this;
   }
@@ -649,14 +648,14 @@ TFilePath StyleReader::m_rootDir = TFilePath();
 
 //===================================================================
 
-void TPalette::setRootDir(const TFilePath &fp) {
+void TPalette::setRootDir(const TFilePath& fp) {
   StyleWriter::setRootDir(fp);
   StyleReader::setRootDir(fp);
 }
 
 //-------------------------------------------------------------------
 
-void TPalette::saveData(TOStream &os) {
+void TPalette::saveData(TOStream& os) {
   os.child("version") << 71 << 0;  // Inserting the version tag at this level.
   // This is necessary to support the tpl format
   if (m_refImgPath !=
@@ -694,7 +693,7 @@ void TPalette::saveData(TOStream &os) {
   os.openChild("stylepages");
   {
     for (int i = 0; i < getPageCount(); ++i) {
-      Page *page = getPage(i);
+      Page* page = getPage(i);
       os.openChild("page");
       {
         os.child("name") << page->getName();
@@ -718,7 +717,7 @@ void TPalette::saveData(TOStream &os) {
       StyleAnimationTable::iterator sat, saEnd = m_styleAnimationTable.end();
       for (sat = m_styleAnimationTable.begin(); sat != saEnd; ++sat) {
         int styleId               = sat->first;
-        StyleAnimation &animation = sat->second;
+        StyleAnimation& animation = sat->second;
 
         std::map<std::string, std::string> attributes;
         attributes["id"] = std::to_string(styleId);
@@ -729,7 +728,7 @@ void TPalette::saveData(TOStream &os) {
           for (kt = animation.begin(); kt != kEnd; ++kt) {
             int frame = kt->first;
 
-            TColorStyle *cs = kt->second.getPointer();
+            TColorStyle* cs = kt->second.getPointer();
             assert(cs);
 
             attributes.clear();
@@ -774,7 +773,7 @@ void TPalette::saveData(TOStream &os) {
 
 //-------------------------------------------------------------------
 
-void TPalette::loadData(TIStream &is) {
+void TPalette::loadData(TIStream& is) {
   m_styles.clear();
   clearPointerContainer(m_pages);
 
@@ -796,7 +795,7 @@ void TPalette::loadData(TIStream &is) {
               "palette, expected tag <style>");  // like this for now.
         {
           StyleReader r(is, version);
-          TColorStyle *cs = TColorStyle::load(r);
+          TColorStyle* cs = TColorStyle::load(r);
 
           std::string pickedPosStr;
           if (is.getTagParam("pickedpos", pickedPosStr))
@@ -816,10 +815,12 @@ void TPalette::loadData(TIStream &is) {
 
           if (!is.openChild(tagName) || tagName != "name")
             throw TException("palette, expected tag <name>");
-          { is >> pageName; }
+          {
+            is >> pageName;
+          }
           is.closeChild();
 
-          Page *page = addPage(pageName);
+          Page* page = addPage(pageName);
 
           if (!is.openChild(tagName) || tagName != "indices")
             throw TException("palette, expected tag <indices>");
@@ -855,11 +856,11 @@ void TPalette::loadData(TIStream &is) {
 
           StyleAnimation animation;
 
-          TColorStyle *style = getStyle(styleId);
+          TColorStyle* style = getStyle(styleId);
           assert(style);
 
           while (is.matchTag(tagName)) {
-            TColorStyle *cs = 0;
+            TColorStyle* cs = 0;
             int frame       = 0;
 
             if (tagName == "keycolor") {
@@ -913,7 +914,7 @@ void TPalette::loadData(TIStream &is) {
 /*! if the palette is copied from studio palette, this function will modify the
  * original names.
  */
-void TPalette::assign(const TPalette *src, bool isFromStudioPalette) {
+void TPalette::assign(const TPalette* src, bool isFromStudioPalette) {
   if (src == this) return;
   int i;
   m_isCleanupPalette = src->isCleanupPalette();
@@ -922,8 +923,8 @@ void TPalette::assign(const TPalette *src, bool isFromStudioPalette) {
   clearPointerContainer(m_pages);
 
   for (i = 0; i < src->getStyleCount(); i++) {
-    TColorStyle *srcStyle = src->getStyle(i);
-    TColorStyle *dstStyle = srcStyle->clone();
+    TColorStyle* srcStyle = src->getStyle(i);
+    TColorStyle* dstStyle = srcStyle->clone();
     dstStyle->setName(
         srcStyle->getName());  // due to a bug in TColorStyle::clone()
     dstStyle->setGlobalName(
@@ -948,8 +949,8 @@ void TPalette::assign(const TPalette *src, bool isFromStudioPalette) {
   }
 
   for (i = 0; i < src->getPageCount(); i++) {
-    const Page *srcPage = src->getPage(i);
-    Page *dstPage       = addPage(srcPage->getName());
+    const Page* srcPage = src->getPage(i);
+    Page* dstPage       = addPage(srcPage->getName());
     for (int j = 0; j < srcPage->getStyleCount(); j++)
       dstPage->addStyle(srcPage->getStyleId(j));
   }
@@ -970,7 +971,7 @@ void TPalette::assign(const TPalette *src, bool isFromStudioPalette) {
        cit != src->m_styleAnimationTable.end(); ++cit) {
     StyleAnimation animation = cit->second;
     for (j = animation.begin(); j != animation.end(); j++)
-      j->second                       = j->second->clone();
+      j->second = j->second->clone();
     m_styleAnimationTable[cit->first] = cit->second;
   }
   m_globalName         = src->getGlobalName();
@@ -984,12 +985,12 @@ void TPalette::assign(const TPalette *src, bool isFromStudioPalette) {
 /*!if the palette is merged from studio palette, this function will modify the
  * original names.
  */
-void TPalette::merge(const TPalette *src, bool isFromStudioPalette) {
+void TPalette::merge(const TPalette* src, bool isFromStudioPalette) {
   std::map<int, int> table;
   int i;
   for (i = 1; i < src->getStyleCount(); i++) {
-    TColorStyle *srcStyle = src->getStyle(i);
-    TColorStyle *dstStyle = srcStyle->clone();
+    TColorStyle* srcStyle = src->getStyle(i);
+    TColorStyle* dstStyle = srcStyle->clone();
     dstStyle->setName(srcStyle->getName());
     dstStyle->setGlobalName(srcStyle->getGlobalName());
 
@@ -1013,11 +1014,11 @@ void TPalette::merge(const TPalette *src, bool isFromStudioPalette) {
 
   int pageCount = src->getPageCount();
   for (i = 0; i < pageCount; i++) {
-    const Page *srcPage   = src->getPage(i);
+    const Page* srcPage   = src->getPage(i);
     std::wstring pageName = srcPage->getName();
     if (pageName == L"colors" && src->getPaletteName() != L"")
-      pageName    = src->getPaletteName();
-    Page *dstPage = addPage(pageName);  //;
+      pageName = src->getPaletteName();
+    Page* dstPage = addPage(pageName);  //;
     for (int j = 0; j < srcPage->getStyleCount(); j++) {
       int styleId = srcPage->getStyleId(j);
       if (styleId == 0) continue;
@@ -1034,7 +1035,7 @@ void TPalette::setIsCleanupPalette(bool on) { m_isCleanupPalette = on; }
 
 //-------------------------------------------------------------------
 
-void TPalette::setRefImg(const TImageP &img) {
+void TPalette::setRefImg(const TImageP& img) {
   m_refImg = img;
   if (img) {
     assert(img->getPalette() == 0);
@@ -1055,7 +1056,7 @@ std::vector<TFrameId> TPalette::getRefLevelFids() { return m_refLevelFids; }
 
 //-------------------------------------------------------------------
 
-void TPalette::setRefImgPath(const TFilePath &refImgPath) {
+void TPalette::setRefImgPath(const TFilePath& refImgPath) {
   m_refImgPath = refImgPath;
 }
 
@@ -1078,14 +1079,14 @@ void TPalette::setFrame(int frame) {
 
   StyleAnimationTable::iterator sat, saEnd = m_styleAnimationTable.end();
   for (sat = m_styleAnimationTable.begin(); sat != saEnd; ++sat) {
-    StyleAnimation &animation = sat->second;
+    StyleAnimation& animation = sat->second;
     assert(!animation.empty());
 
     // Retrieve the associated style to interpolate
     int styleId = sat->first;
     assert(0 <= styleId && styleId < getStyleCount());
 
-    TColorStyle *cs = getStyle(styleId);
+    TColorStyle* cs = getStyle(styleId);
     assert(cs);
 
     // Build the keyframes interval containing frame
@@ -1132,7 +1133,7 @@ int TPalette::getKeyframeCount(int styleId) const {
 int TPalette::getKeyframe(int styleId, int index) const {
   StyleAnimationTable::const_iterator it = m_styleAnimationTable.find(styleId);
   if (it == m_styleAnimationTable.end()) return -1;
-  const StyleAnimation &animation = it->second;
+  const StyleAnimation& animation = it->second;
   if (index < 0 || index >= (int)animation.size()) return -1;
   StyleAnimation::const_iterator j = animation.begin();
   std::advance(j, index);
@@ -1154,7 +1155,7 @@ void TPalette::setKeyframe(int styleId, int frame) {
 
   assert(sat != m_styleAnimationTable.end());
 
-  StyleAnimation &animation = sat->second;
+  StyleAnimation& animation = sat->second;
   animation[frame]          = getStyle(styleId)->clone();
 }
 
@@ -1165,7 +1166,7 @@ void TPalette::clearKeyframe(int styleId, int frame) {
   assert(0 <= frame);
   StyleAnimationTable::iterator it = m_styleAnimationTable.find(styleId);
   if (it == m_styleAnimationTable.end()) return;
-  StyleAnimation &animation  = it->second;
+  StyleAnimation& animation  = it->second;
   StyleAnimation::iterator j = animation.find(frame);
   if (j == animation.end()) return;
   // j->second->release();
@@ -1191,7 +1192,7 @@ int TPalette::getShortcutValue(int key) const {
 int TPalette::getStyleShortcut(int styleId) const {
   assert(0 <= styleId && styleId < getStyleCount());
 
-  Page *page = getStylePage(styleId);
+  Page* page = getStylePage(styleId);
   // shortcut is available only in the first page
   if (!page || page->getIndex() != 0) return -1;
   int indexInPage   = page->search(styleId);

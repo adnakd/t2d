@@ -8,7 +8,7 @@
 #include <QFileInfo>
 #include <QFileInfoList>
 
-//#define USE_SQLITE_HDPOOL
+// #define USE_SQLITE_HDPOOL
 
 #ifdef USE_SQLITE_HDPOOL
 // SQLite include
@@ -18,8 +18,8 @@
 #include "tcacheresourcepool.h"
 
 // Debug
-//#define DIAGNOSTICS
-//#include "diagnostics.h"
+// #define DIAGNOSTICS
+// #include "diagnostics.h"
 
 //******************************************************************************************
 //    Cache Resource Pool BACKED ON DISK
@@ -105,7 +105,7 @@ void TCacheResourcePool::setPath(QString cacheRoot, QString projectName,
 
 //-----------------------------------------------------------------------------------
 
-void TCacheResourcePool::startBacking(TCacheResource *resource) {
+void TCacheResourcePool::startBacking(TCacheResource* resource) {
   assert(isHDActive());
   if (!isHDActive()) return;
 
@@ -122,7 +122,7 @@ void TCacheResourcePool::startBacking(TCacheResource *resource) {
 //    Cache resource pool implementation
 //******************************************************************************************
 
-TCacheResourcePool *TCacheResourcePool::instance() {
+TCacheResourcePool* TCacheResourcePool::instance() {
   static TCacheResourcePool theInstance;
   return &theInstance;
 }
@@ -130,8 +130,7 @@ TCacheResourcePool *TCacheResourcePool::instance() {
 //----------------------------------------------------------------------
 
 TCacheResourcePool::TCacheResourcePool()
-    : m_memMutex(QMutex::Recursive)
-    , m_searchCount(0)
+    : m_searchCount(0)
     , m_foundIterator(false)
     , m_searchIterator(m_memResources.end())
     , m_hdPool(0)
@@ -150,7 +149,7 @@ TCacheResourcePool::~TCacheResourcePool() {
 
 //----------------------------------------------------------------------
 
-const TFilePath &TCacheResourcePool::getPath() const { return m_path; }
+const TFilePath& TCacheResourcePool::getPath() const { return m_path; }
 
 //----------------------------------------------------------------------
 
@@ -183,12 +182,12 @@ void TCacheResourcePool::endCachedSearch() {
 //! Attempts retrieval of the resource with specified name, and eventually
 //! creates it if
 //! the createIfNone parameter is set.
-TCacheResource *TCacheResourcePool::getResource(const std::string &name,
+TCacheResource* TCacheResourcePool::getResource(const std::string& name,
                                                 bool createIfNone) {
   // DIAGNOSTICS_TIMER("#times.txt | getResource Overall time");
   // DIAGNOSTICS_MEANTIMER("#times.txt | getResource Mean time");
 
-  TCacheResource *result = 0;
+  TCacheResource* result = 0;
 
   // NOTA: Passa ad un oggetto lockatore. Quello e' in grado di gestire i casi
   // di eccezioni ecc..
@@ -243,13 +242,13 @@ TCacheResource *TCacheResourcePool::getResource(const std::string &name,
     }
 
     if (!resourcePath.isEmpty() || createIfNone) {
-      TCacheResource *result = new TCacheResource;
+      TCacheResource* result = new TCacheResource;
       result->m_pos          = m_searchIterator =
           m_memResources.insert(m_searchIterator, std::make_pair(name, result));
 
-// DIAGNOSTICS_STRSET("#resources.txt | RISORSE | " + QString::number((UINT)
-// result) + " | Name",
-// QString::fromStdString(name).left(70));
+      // DIAGNOSTICS_STRSET("#resources.txt | RISORSE | " +
+      // QString::number((UINT) result) + " | Name",
+      // QString::fromStdString(name).left(70));
 
 #ifdef USE_SQLITE_HDPOOL
       if (isHDActive()) m_hdPool->loadResourceInfos(result, resourcePath);
@@ -268,7 +267,7 @@ TCacheResource *TCacheResourcePool::getResource(const std::string &name,
 
 //----------------------------------------------------------------------
 
-void TCacheResourcePool::releaseResource(TCacheResource *resource) {
+void TCacheResourcePool::releaseResource(TCacheResource* resource) {
   QMutexLocker locker(&m_memMutex);
 
   // Re-check the resource's reference count. This is necessary since a

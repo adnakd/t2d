@@ -8,7 +8,7 @@
 
 #include "tpassivecachemanager.h"
 
-//#define USE_SQLITE_HDPOOL
+// #define USE_SQLITE_HDPOOL
 
 /* PRACTICAL EXPLANATION:
 
@@ -140,17 +140,17 @@ previews will keep its
 
 //  Local stuff - inlines
 namespace {
-inline QRect toQRect(const TRect &r) {
+inline QRect toQRect(const TRect& r) {
   return QRect(r.x0, r.y0, r.getLx(), r.getLy());
 }
-inline TRect toTRect(const QRect &r) {
+inline TRect toTRect(const QRect& r) {
   return TRect(r.left(), r.top(), r.right(), r.bottom());
 }
-}
+}  // namespace
 
 //---------------------------------------------------------------------------
 
-TFx *TPassiveCacheManager::getNotAllowingAncestor(TFx *fx) {
+TFx* TPassiveCacheManager::getNotAllowingAncestor(TFx* fx) {
   // Trace all output ports
   int outputPortsCount = fx->getOutputConnectionCount();
   /*if(!outputPortsCount)   //We have no access to TApp here!!
@@ -164,8 +164,8 @@ return getNotAllowingAncestor(dag->getXsheetFx());
   // Now, for common ports
   for (int i = 0; i < outputPortsCount; ++i) {
     // Find the output Fx and the port connected to our fx
-    TFxPort *port    = fx->getOutputConnection(i);
-    TRasterFx *outFx = static_cast<TRasterFx *>(port->getOwnerFx());
+    TFxPort* port    = fx->getOutputConnection(i);
+    TRasterFx* outFx = static_cast<TRasterFx*>(port->getOwnerFx());
 
     int portIdx, portsCount = outFx->getInputPortCount();
     for (portIdx = 0; portIdx < portsCount; ++portIdx)
@@ -174,7 +174,7 @@ return getNotAllowingAncestor(dag->getXsheetFx());
 
     if (!outFx->allowUserCacheOnPort(portIdx)) return outFx;
 
-    TFx *naAncestor = getNotAllowingAncestor(outFx);
+    TFx* naAncestor = getNotAllowingAncestor(outFx);
     if (naAncestor) return naAncestor;
   }
 
@@ -201,12 +201,12 @@ public:
 
   class Iterator {
   protected:
-    Table *m_table;
+    Table* m_table;
     RowsIterator m_rowIt;
     typename Row::iterator m_it;
 
     friend class Table;
-    Iterator(Table *table) : m_table(table) {}
+    Iterator(Table* table) : m_table(table) {}
 
     virtual void makeConsistent() {
       if (m_it == m_rowIt->second.end()) {
@@ -216,8 +216,8 @@ public:
     }
 
   public:
-    const RowKey &row() { return m_rowIt->first; }
-    const ColKey &col() { return m_it->first; }
+    const RowKey& row() { return m_rowIt->first; }
+    const ColKey& col() { return m_it->first; }
 
     virtual void operator++() {
       ++m_it;
@@ -226,19 +226,19 @@ public:
 
     virtual operator bool() { return m_rowIt != m_table->m_table.end(); }
 
-    Val &operator*() { return m_it->second; }
-    Val *operator->() { return &m_it->second; }
+    Val& operator*() { return m_it->second; }
+    Val* operator->() { return &m_it->second; }
 
-    bool operator==(const Iterator &it) { return m_it == it.m_it; }
+    bool operator==(const Iterator& it) { return m_it == it.m_it; }
 
-    bool operator!=(const Iterator &it) { return !operator==(it); }
+    bool operator!=(const Iterator& it) { return !operator==(it); }
   };
 
   class ColIterator final : public Iterator {
     ColKey m_colKey;
 
     friend class Table;
-    ColIterator(Table *table, const ColKey &c) : Iterator(table), m_colKey(c) {}
+    ColIterator(Table* table, const ColKey& c) : Iterator(table), m_colKey(c) {}
 
     void makeConsistent() override {
       Iterator::m_rowIt = Iterator::m_rowIt;
@@ -258,7 +258,7 @@ public:
 
   class RowIterator final : public Iterator {
     friend class Table;
-    RowIterator(Table *table) : Iterator(table) {}
+    RowIterator(Table* table) : Iterator(table) {}
 
     void makeConsistent() override {}
 
@@ -278,7 +278,7 @@ public:
   Table() {}
   ~Table() {}
 
-  std::map<RowKey, Row> &rows() { return m_table; }
+  std::map<RowKey, Row>& rows() { return m_table; }
 
   Iterator begin() {
     Iterator result(this);
@@ -288,7 +288,7 @@ public:
     return result;
   }
 
-  RowIterator rowBegin(const RowKey &row) {
+  RowIterator rowBegin(const RowKey& row) {
     RowIterator result(this);
     result.m_rowIt = m_table.find(row);
     if (result.m_rowIt != m_table.end())
@@ -296,25 +296,25 @@ public:
     return result;
   }
 
-  ColIterator colBegin(const ColKey &col) {
+  ColIterator colBegin(const ColKey& col) {
     ColIterator result(this, col);
     result.m_rowIt = m_table.begin();
     result.makeConsistent();
     return result;
   }
 
-  Val &value(const RowKey &r, const ColKey &c) { return m_table[r][c]; }
+  Val& value(const RowKey& r, const ColKey& c) { return m_table[r][c]; }
 
-  Iterator insert(const RowKey &r, const ColKey &c, const Val &val) {
+  Iterator insert(const RowKey& r, const ColKey& c, const Val& val) {
     Iterator result(this);
     result.m_rowIt = m_table.insert(std::make_pair(r, Row())).first;
     result.m_it = result.m_rowIt->second.insert(std::make_pair(c, val)).first;
     return result;
   }
 
-  Iterator erase(const Iterator &it) {
+  Iterator erase(const Iterator& it) {
     Iterator result(it);
-    Row &row = it.m_rowIt->second;
+    Row& row = it.m_rowIt->second;
     ++result.m_it;
     row.erase(it.m_it);
     if (result.m_it == row.end() && row.empty()) {
@@ -327,7 +327,7 @@ public:
     return result;
   }
 
-  void erase(const ColKey &c) {
+  void erase(const ColKey& c) {
     ColIterator it(colBegin(c));
     while (it) {
       RowsIterator rowIt = it.m_rowIt;
@@ -337,7 +337,7 @@ public:
     }
   }
 
-  void erase(const RowKey &r) { m_table.erase(r); }
+  void erase(const RowKey& r) { m_table.erase(r); }
 
   void clear() { m_table.clear(); }
 };
@@ -347,18 +347,18 @@ public:
 struct LockedResourceP {
   TCacheResourceP m_resource;
 
-  LockedResourceP(const TCacheResourceP &resource) : m_resource(resource) {
+  LockedResourceP(const TCacheResourceP& resource) : m_resource(resource) {
     m_resource->addLock();
   }
 
-  LockedResourceP(const LockedResourceP &resource)
+  LockedResourceP(const LockedResourceP& resource)
       : m_resource(resource.m_resource) {
     m_resource->addLock();
   }
 
   ~LockedResourceP() { m_resource->releaseLock(); }
 
-  LockedResourceP &operator=(const LockedResourceP &src) {
+  LockedResourceP& operator=(const LockedResourceP& src) {
     src.m_resource->addLock();
     if (m_resource) m_resource->releaseLock();
     m_resource = src.m_resource;
@@ -367,12 +367,12 @@ struct LockedResourceP {
 
   operator bool() const { return m_resource; }
 
-  bool operator<(const LockedResourceP &resource) const {
+  bool operator<(const LockedResourceP& resource) const {
     return m_resource < resource.m_resource;
   }
 
-  TCacheResource *operator->() const { return m_resource.getPointer(); }
-  TCacheResource &operator*() const { return *m_resource.getPointer(); }
+  TCacheResource* operator->() const { return m_resource.getPointer(); }
+  TCacheResource& operator*() const { return *m_resource.getPointer(); }
 };
 
 typedef Table<std::string, int, std::set<LockedResourceP>> ResourcesTable;
@@ -386,7 +386,7 @@ public:
   ResourcesContainer() {}
   ~ResourcesContainer() {}
 
-  ResourcesTable &getTable() { return m_resources; }
+  ResourcesTable& getTable() { return m_resources; }
 };
 
 //*****************************************************************************************
@@ -410,7 +410,7 @@ TPassiveCacheManager::FxData::~FxData() {}
 
 class TPassiveCacheManagerGenerator final
     : public TRenderResourceManagerGenerator {
-  TRenderResourceManager *operator()(void) override {
+  TRenderResourceManager* operator()(void) override {
     // return new TPassiveCacheManager;
     return TPassiveCacheManager::instance();
   }
@@ -432,7 +432,6 @@ TPassiveCacheManager::TPassiveCacheManager()
 #endif
     , m_enabled(true)
     , m_descriptorCallback(0)
-    , m_mutex(QMutex::Recursive)
     , m_resources(new ResourcesContainer) {
   reset();
 }
@@ -443,7 +442,7 @@ TPassiveCacheManager::~TPassiveCacheManager() { delete m_resources; }
 
 //-------------------------------------------------------------------------
 
-TPassiveCacheManager *TPassiveCacheManager::instance() {
+TPassiveCacheManager* TPassiveCacheManager::instance() {
   static TPassiveCacheManager theInstance;
   return &theInstance;
 }
@@ -451,7 +450,7 @@ TPassiveCacheManager *TPassiveCacheManager::instance() {
 //-------------------------------------------------------------------------
 
 void TPassiveCacheManager::setContextName(unsigned long renderId,
-                                          const std::string &name) {
+                                          const std::string& name) {
   QMutexLocker locker(&m_mutex);
 
   // Retrieve the context data if already present
@@ -531,7 +530,7 @@ void TPassiveCacheManager::onSceneLoaded() {
 #ifndef USE_SQLITE_HDPOOL
   unsigned int count = m_fxDataVector.size();
   for (unsigned int i = 0; i < count; ++i) {
-    FxData &data = m_fxDataVector[i];
+    FxData& data = m_fxDataVector[i];
     (*m_descriptorCallback)(data.m_treeDescription, data.m_fx);
   }
 #endif
@@ -539,7 +538,7 @@ void TPassiveCacheManager::onSceneLoaded() {
 
 //-----------------------------------------------------------------------------------
 
-void TPassiveCacheManager::touchFxData(int &idx) {
+void TPassiveCacheManager::touchFxData(int& idx) {
   if (idx >= 0) return;
 
   QMutexLocker locker(&m_mutex);
@@ -550,11 +549,11 @@ void TPassiveCacheManager::touchFxData(int &idx) {
 
 //-----------------------------------------------------------------------------------
 
-int TPassiveCacheManager::declareCached(TFx *fx, int passiveCacheId) {
-  int &idx = fx->getAttributes()->passiveCacheDataIdx();
+int TPassiveCacheManager::declareCached(TFx* fx, int passiveCacheId) {
+  int& idx = fx->getAttributes()->passiveCacheDataIdx();
   touchFxData(idx);
 
-  FxData &data          = m_fxDataVector[idx];
+  FxData& data          = m_fxDataVector[idx];
   data.m_fx             = fx;
   data.m_storageFlag    = m_currStorageFlag;
   data.m_passiveCacheId = updatePassiveCacheId(passiveCacheId);
@@ -573,7 +572,7 @@ void TPassiveCacheManager::reset() {
 
 //-------------------------------------------------------------------------
 
-bool TPassiveCacheManager::cacheEnabled(TFx *fx) {
+bool TPassiveCacheManager::cacheEnabled(TFx* fx) {
   int idx = fx->getAttributes()->passiveCacheDataIdx();
   if (idx < 0) return false;
 
@@ -586,7 +585,7 @@ bool TPassiveCacheManager::cacheEnabled(TFx *fx) {
 
 //-------------------------------------------------------------------------
 
-int TPassiveCacheManager::getPassiveCacheId(TFx *fx) {
+int TPassiveCacheManager::getPassiveCacheId(TFx* fx) {
   int idx = fx->getAttributes()->passiveCacheDataIdx();
   if (idx < 0) return 0;
 
@@ -599,7 +598,7 @@ int TPassiveCacheManager::getPassiveCacheId(TFx *fx) {
 //-------------------------------------------------------------------------
 
 TPassiveCacheManager::StorageFlag TPassiveCacheManager::getStorageMode(
-    TFx *fx) {
+    TFx* fx) {
   int idx = fx->getAttributes()->passiveCacheDataIdx();
   if (idx < 0) return NONE;
 
@@ -610,11 +609,11 @@ TPassiveCacheManager::StorageFlag TPassiveCacheManager::getStorageMode(
 
 //-------------------------------------------------------------------------
 
-void TPassiveCacheManager::enableCache(TFx *fx) {
-  int &idx = fx->getAttributes()->passiveCacheDataIdx();
+void TPassiveCacheManager::enableCache(TFx* fx) {
+  int& idx = fx->getAttributes()->passiveCacheDataIdx();
   touchFxData(idx);
 
-  FxData &data = m_fxDataVector[idx];
+  FxData& data = m_fxDataVector[idx];
 
   QMutexLocker locker(&m_mutex);
 
@@ -625,7 +624,7 @@ void TPassiveCacheManager::enableCache(TFx *fx) {
 
   StorageFlag flag = getStorageMode();
   if (flag) {
-    UCHAR &storedFlag = data.m_storageFlag;
+    UCHAR& storedFlag = data.m_storageFlag;
     UCHAR oldFlag     = storedFlag;
 
     storedFlag |= flag;
@@ -637,7 +636,7 @@ void TPassiveCacheManager::enableCache(TFx *fx) {
       ResourcesTable::ColIterator it =
           m_resources->getTable().colBegin(data.m_passiveCacheId);
       for (; it; ++it) {
-        std::set<LockedResourceP> &resources = *it;
+        std::set<LockedResourceP>& resources = *it;
 
         std::set<LockedResourceP>::iterator jt;
         for (jt = resources.begin(); jt != resources.end(); ++jt)
@@ -656,11 +655,11 @@ void TPassiveCacheManager::enableCache(TFx *fx) {
 
 //-------------------------------------------------------------------------
 
-void TPassiveCacheManager::disableCache(TFx *fx) {
+void TPassiveCacheManager::disableCache(TFx* fx) {
   int idx = fx->getAttributes()->passiveCacheDataIdx();
   if (idx < 0) return;
 
-  FxData &data = m_fxDataVector[idx];
+  FxData& data = m_fxDataVector[idx];
 
   QMutexLocker locker(&m_mutex);
 
@@ -671,7 +670,7 @@ void TPassiveCacheManager::disableCache(TFx *fx) {
 
   StorageFlag flag = getStorageMode();
   if (flag) {
-    UCHAR &storedFlag = data.m_storageFlag;
+    UCHAR& storedFlag = data.m_storageFlag;
     UCHAR oldFlag     = storedFlag;
 
     storedFlag &= ~flag;
@@ -693,17 +692,17 @@ void TPassiveCacheManager::disableCache(TFx *fx) {
 
 //-------------------------------------------------------------------------
 
-void TPassiveCacheManager::toggleCache(TFx *fx) {
-  int &idx = fx->getAttributes()->passiveCacheDataIdx();
+void TPassiveCacheManager::toggleCache(TFx* fx) {
+  int& idx = fx->getAttributes()->passiveCacheDataIdx();
   touchFxData(idx);
 
-  FxData &data = m_fxDataVector[idx];
+  FxData& data = m_fxDataVector[idx];
 
   QMutexLocker locker(&m_mutex);
 
   StorageFlag flag = getStorageMode();
   if (flag) {
-    UCHAR &storedFlag = data.m_storageFlag;
+    UCHAR& storedFlag = data.m_storageFlag;
     UCHAR oldFlag     = storedFlag;
 
     storedFlag ^= flag;
@@ -721,7 +720,7 @@ void TPassiveCacheManager::toggleCache(TFx *fx) {
       ResourcesTable::ColIterator it =
           m_resources->getTable().colBegin(data.m_passiveCacheId);
       for (; it; ++it) {
-        std::set<LockedResourceP> &resources = *it;
+        std::set<LockedResourceP>& resources = *it;
 
         std::set<LockedResourceP>::iterator jt;
         for (jt = resources.begin(); jt != resources.end(); ++jt)
@@ -758,14 +757,14 @@ void TPassiveCacheManager::toggleCache(TFx *fx) {
 
 //-------------------------------------------------------------------------
 
-void TPassiveCacheManager::invalidateLevel(const std::string &levelName) {
+void TPassiveCacheManager::invalidateLevel(const std::string& levelName) {
   QMutexLocker locker(&m_mutex);
 
   // Traverse the managed resources for passed levelName.
-  ResourcesTable &table       = m_resources->getTable();
+  ResourcesTable& table       = m_resources->getTable();
   ResourcesTable::Iterator it = table.begin();
   while (it) {
-    std::set<LockedResourceP> &resources = *it;
+    std::set<LockedResourceP>& resources = *it;
     std::set<LockedResourceP>::iterator jt, kt;
     for (jt = resources.begin(); jt != resources.end();) {
       if ((*jt)->getName().find(levelName) != std::string::npos) {
@@ -791,7 +790,7 @@ void TPassiveCacheManager::invalidateLevel(const std::string &levelName) {
 
 void TPassiveCacheManager::forceInvalidate() {
 #ifdef USE_SQLITE_HDPOOL
-  TCacheResourcePool *pool = TCacheResourcePool::instance();
+  TCacheResourcePool* pool = TCacheResourcePool::instance();
 
   // Clear all invalidated levels from the resource pool
   std::set<std::string>::iterator it;
@@ -806,7 +805,7 @@ void TPassiveCacheManager::forceInvalidate() {
 
 // Generate the fx's tree description. If it is contained in one of those
 // stored with cached fxs, release their associated resources.
-void TPassiveCacheManager::onFxChanged(const TFxP &fx) {
+void TPassiveCacheManager::onFxChanged(const TFxP& fx) {
 #ifndef USE_SQLITE_HDPOOL
 
   std::string fxTreeDescription;
@@ -814,7 +813,7 @@ void TPassiveCacheManager::onFxChanged(const TFxP &fx) {
 
   unsigned int count = m_fxDataVector.size();
   for (unsigned int i = 0; i < count; ++i) {
-    FxData &data = m_fxDataVector[i];
+    FxData& data = m_fxDataVector[i];
 
     if (!data.m_fx) continue;
 
@@ -839,7 +838,7 @@ void TPassiveCacheManager::onXsheetChanged() {
 
   unsigned int count = m_fxDataVector.size();
   for (unsigned int i = 0; i < count; ++i) {
-    FxData &data = m_fxDataVector[i];
+    FxData& data = m_fxDataVector[i];
 
     if (!data.m_fx) continue;
 
@@ -857,10 +856,10 @@ void TPassiveCacheManager::onXsheetChanged() {
 
 //-------------------------------------------------------------------------
 
-void TPassiveCacheManager::getResource(TCacheResourceP &resource,
-                                       const std::string &alias, const TFxP &fx,
-                                       double frame, const TRenderSettings &rs,
-                                       ResourceDeclaration *resData) {
+void TPassiveCacheManager::getResource(TCacheResourceP& resource,
+                                       const std::string& alias, const TFxP& fx,
+                                       double frame, const TRenderSettings& rs,
+                                       ResourceDeclaration* resData) {
   if (!(m_enabled && fx && rs.m_userCachable)) return;
 
   StorageFlag flag = getStorageMode(fx.getPointer());
@@ -897,7 +896,7 @@ void TPassiveCacheManager::getResource(TCacheResourceP &resource,
 //-------------------------------------------------------------------------
 
 void TPassiveCacheManager::releaseContextNamesWithPrefix(
-    const std::string &prefix) {
+    const std::string& prefix) {
   QMutexLocker locker(&m_mutex);
 
 #ifdef DIAGNOSTICS
@@ -918,8 +917,8 @@ void TPassiveCacheManager::releaseContextNamesWithPrefix(
   }
 
   // Transfer to temporary
-  ResourcesTable &table = m_resources->getTable();
-  std::map<std::string, ResourcesTable::Row> &rows =
+  ResourcesTable& table = m_resources->getTable();
+  std::map<std::string, ResourcesTable::Row>& rows =
       m_resources->getTable().rows();
 
   std::map<std::string, ResourcesTable::Row>::iterator it, jt, kt;
@@ -949,10 +948,10 @@ void TPassiveCacheManager::releaseOldResources() {
   std::string contextName(getContextName());
   if (contextName.empty()) return;
 
-  char &lastChar = contextName[contextName.size() - 1];
+  char& lastChar = contextName[contextName.size() - 1];
   lastChar       = '0' + !(lastChar - '0');
 
-  ResourcesTable &table = m_resources->getTable();
+  ResourcesTable& table = m_resources->getTable();
   table.erase(contextName);
   table.erase("T");
 }
