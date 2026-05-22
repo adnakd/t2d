@@ -49,7 +49,7 @@ public:
         , m_xoffset("")
         , m_yoffset("") {}
     Res(std::string name, int xres, int yres, double ar, double fx = 0,
-        double fy = 0, std::string xoffset = 0, std::string yoffset = 0)
+        double fy = 0, std::string xoffset = "0", std::string yoffset = "0")
         : m_name(name)
         , m_xres(xres)
         , m_yres(yres)
@@ -67,21 +67,21 @@ private:
 private:
   ResListManager(bool forCleanup);
 
-  void add(const std::string &line);
+  void add(const std::string& line);
 
   void load();
   void save();
 
 public:
-  static ResListManager *instance(bool forCleanup);
+  static ResListManager* instance(bool forCleanup);
 
-  void getNames(std::vector<std::string> &names);
-  const Res *getRes(const std::string &name) const;
+  void getNames(std::vector<std::string>& names);
+  const Res* getRes(const std::string& name) const;
 
-  const Res *add(std::string name, int xres, int yres, double ar, double fx = 0,
-                 double fy = 0, std::string xoffset = 0,
-                 std::string yoffset = 0);
-  void remove(const std::string &name);
+  const Res* add(std::string name, int xres, int yres, double ar, double fx = 0,
+                 double fy = 0, std::string xoffset = "0",
+                 std::string yoffset = "0");
+  void remove(const std::string& name);
 
 signals:
 

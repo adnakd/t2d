@@ -30,12 +30,12 @@ namespace {
 
 // Filescope declarations
 
-typedef std::pair<QOpenGLShaderProgram *, QDateTime> CompiledShader;
+typedef std::pair<QOpenGLShaderProgram*, QDateTime> CompiledShader;
 
 struct CaselessCompare {
-  const QString &m_str;
-  CaselessCompare(const QString &str) : m_str(str) {}
-  bool operator()(const QString &str) const {
+  const QString& m_str;
+  CaselessCompare(const QString& str) : m_str(str) {}
+  bool operator()(const QString& str) const {
     return (m_str.compare(str, Qt::CaseInsensitive) == 0);
   }
 };
@@ -80,11 +80,11 @@ const static std::string l_names[NAMESCOUNT] = {
 
 // Filescope functions
 
-inline bool loadShader(QOpenGLShader::ShaderType type, const TFilePath &fp,
-                       CompiledShader &cs) {
-  QOpenGLShader *shader = new QOpenGLShader(type, cs.first);
+inline bool loadShader(QOpenGLShader::ShaderType type, const TFilePath& fp,
+                       CompiledShader& cs) {
+  QOpenGLShader* shader = new QOpenGLShader(type, cs.first);
 
-  const QString &qfp = QString::fromStdWString(fp.getWideString());
+  const QString& qfp = QString::fromStdWString(fp.getWideString());
 
   QFileInfo shaderFileInfo(qfp);
   cs.second = shaderFileInfo.lastModified();
@@ -92,14 +92,14 @@ inline bool loadShader(QOpenGLShader::ShaderType type, const TFilePath &fp,
   return shader->compileSourceFile(qfp) && cs.first->addShader(shader);
 }
 
-void dumpError(TIStream &is, const std::wstring &err = std::wstring()) {
+void dumpError(TIStream& is, const std::wstring& err = std::wstring()) {
   DVGui::info("Error reading " +
               QString::fromStdWString(is.getFilePath().getLevelNameW()) +
               " (line " + QString::number(is.getLine()) + ")" +
               (err.empty() ? QString() : QString::fromStdWString(L": " + err)));
 }
 
-void skipTag(TIStream &is, const std::string &tagName) {
+void skipTag(TIStream& is, const std::string& tagName) {
   DVGui::info("Error reading " +
               QString::fromStdWString(is.getFilePath().getLevelNameW()) +
               " (line " + QString::number(is.getLine()) + "): Unknown tag '<" +
@@ -129,32 +129,32 @@ bool ShaderInterface::isValid() const { return m_mainShader.isValid(); }
 
 //---------------------------------------------------------
 
-const std::vector<ShaderInterface::Parameter> &ShaderInterface::parameters()
+const std::vector<ShaderInterface::Parameter>& ShaderInterface::parameters()
     const {
   return m_parameters;
 }
 
 //---------------------------------------------------------
 
-const std::vector<QString> &ShaderInterface::inputPorts() const {
+const std::vector<QString>& ShaderInterface::inputPorts() const {
   return m_ports;
 }
 
 //---------------------------------------------------------
 
-const ShaderInterface::ShaderData &ShaderInterface::mainShader() const {
+const ShaderInterface::ShaderData& ShaderInterface::mainShader() const {
   return m_mainShader;
 }
 
 //---------------------------------------------------------
 
-const ShaderInterface::ShaderData &ShaderInterface::inputPortsShader() const {
+const ShaderInterface::ShaderData& ShaderInterface::inputPortsShader() const {
   return m_portsShader;
 }
 
 //---------------------------------------------------------
 
-const ShaderInterface::ShaderData &ShaderInterface::bboxShader() const {
+const ShaderInterface::ShaderData& ShaderInterface::bboxShader() const {
   return m_bboxShader;
 }
 
@@ -166,9 +166,9 @@ ShaderInterface::HandledWorldTransformsType ShaderInterface::hwtType() const {
 
 //---------------------------------------------------------
 
-std::pair<QOpenGLShaderProgram *, QDateTime> ShaderInterface::makeProgram(
-    const ShaderData &sd, int varyingsCount,
-    const GLchar **varyingNames) const {
+std::pair<QOpenGLShaderProgram*, QDateTime> ShaderInterface::makeProgram(
+    const ShaderData& sd, int varyingsCount,
+    const GLchar** varyingNames) const {
   CompiledShader result;
 
   if (!isValid()) return result;
@@ -190,10 +190,10 @@ std::pair<QOpenGLShaderProgram *, QDateTime> ShaderInterface::makeProgram(
 
 //---------------------------------------------------------
 
-void ShaderInterface::saveData(TOStream &os) {
+void ShaderInterface::saveData(TOStream& os) {
   struct locals {
-    inline static TFilePath getRelativePath(const TFilePath &file,
-                                            const TFilePath &relTo) {
+    inline static TFilePath getRelativePath(const TFilePath& file,
+                                            const TFilePath& relTo) {
       QDir relToDir(
           QString::fromStdWString(relTo.getParentDir().getWideString()));
       QString relFileStr(relToDir.relativeFilePath(
@@ -253,10 +253,10 @@ void ShaderInterface::saveData(TOStream &os) {
 
 //---------------------------------------------------------
 
-void ShaderInterface::loadData(TIStream &is) {
+void ShaderInterface::loadData(TIStream& is) {
   struct locals {
-    inline static TFilePath getAbsolutePath(const TFilePath &file,
-                                            const TFilePath &relTo) {
+    inline static TFilePath getAbsolutePath(const TFilePath& file,
+                                            const TFilePath& relTo) {
       QDir relToDir(
           QString::fromStdWString(relTo.getParentDir().getWideString()));
       QString absFileStr(relToDir.absoluteFilePath(
@@ -264,7 +264,7 @@ void ShaderInterface::loadData(TIStream &is) {
       return TFilePath(absFileStr.toStdWString());
     }
 
-    static bool nameMatch(const QString &name, const Parameter &param) {
+    static bool nameMatch(const QString& name, const Parameter& param) {
       return (name == param.m_name);
     }
   };
@@ -330,16 +330,16 @@ void ShaderInterface::loadData(TIStream &is) {
 
         is.closeChild();
       } else if (tagName == l_names[CONCEPT]) {
-        ParameterConcept concept;
-        is >> concept;
+        ParameterConcept parConcept;
+        is >> parConcept;
 
-        m_parConcepts.push_back(concept);
+        m_parConcepts.push_back(parConcept);
 
         is.closeChild();
       } else
         ::skipTag(is, tagName);
     };
-  } catch (const TException &e) {
+  } catch (const TException& e) {
     ::dumpError(is, e.getMessage());
     clear();
   } catch (...) {
@@ -352,10 +352,10 @@ void ShaderInterface::loadData(TIStream &is) {
 //    ShaderInterface::ShaderData  implementation
 //**********************************************************************
 
-void ShaderInterface::ShaderData::saveData(TOStream &os) {
+void ShaderInterface::ShaderData::saveData(TOStream& os) {
   struct locals {
-    inline static TFilePath getRelativePath(const TFilePath &file,
-                                            const TFilePath &relTo) {
+    inline static TFilePath getRelativePath(const TFilePath& file,
+                                            const TFilePath& relTo) {
       QDir relToDir(
           QString::fromStdWString(relTo.getParentDir().getWideString()));
       QString relFileStr(relToDir.relativeFilePath(
@@ -375,10 +375,10 @@ void ShaderInterface::ShaderData::saveData(TOStream &os) {
 
 //---------------------------------------------------------
 
-void ShaderInterface::ShaderData::loadData(TIStream &is) {
+void ShaderInterface::ShaderData::loadData(TIStream& is) {
   struct locals {
-    inline static TFilePath getAbsolutePath(const TFilePath &file,
-                                            const TFilePath &relTo) {
+    inline static TFilePath getAbsolutePath(const TFilePath& file,
+                                            const TFilePath& relTo) {
       QDir relToDir(
           QString::fromStdWString(relTo.getParentDir().getWideString()));
       QString absFileStr(relToDir.absoluteFilePath(
@@ -405,7 +405,7 @@ void ShaderInterface::ShaderData::loadData(TIStream &is) {
 //    ShaderInterface::ParameterConcept  implementation
 //**********************************************************************
 
-void ShaderInterface::ParameterConcept::saveData(TOStream &os) {
+void ShaderInterface::ParameterConcept::saveData(TOStream& os) {
   os << l_conceptNames[m_type];
 
   if (!m_label.isEmpty()) {
@@ -424,7 +424,7 @@ void ShaderInterface::ParameterConcept::saveData(TOStream &os) {
 
 //---------------------------------------------------------
 
-void ShaderInterface::ParameterConcept::loadData(TIStream &is) {
+void ShaderInterface::ParameterConcept::loadData(TIStream& is) {
   // Read the concept type
   QString conceptName;
   is >> conceptName;
@@ -462,7 +462,7 @@ void ShaderInterface::ParameterConcept::loadData(TIStream &is) {
 //    ShaderInterface::Parameter  implementation
 //**********************************************************************
 
-void ShaderInterface::Parameter::saveData(TOStream &os) {
+void ShaderInterface::Parameter::saveData(TOStream& os) {
   os << l_typeNames[m_type] << m_name;
 
   os.openChild(l_names[CONCEPT]);
@@ -564,7 +564,7 @@ void ShaderInterface::Parameter::saveData(TOStream &os) {
 
 //---------------------------------------------------------
 
-void ShaderInterface::Parameter::loadData(TIStream &is) {
+void ShaderInterface::Parameter::loadData(TIStream& is) {
   // Load type and name
 
   QString typeName;
@@ -609,7 +609,8 @@ void ShaderInterface::Parameter::loadData(TIStream &is) {
         (std::numeric_limits<GLfloat>::max)();
     break;
   case VEC4:
-    m_default.m_vec4[0] = m_default.m_vec4[1] = m_default.m_vec4[2] = m_default.m_vec4[3] = 0.0;
+    m_default.m_vec4[0] = m_default.m_vec4[1] = m_default.m_vec4[2] =
+        m_default.m_vec4[3]                   = 0.0;
     m_range[0].m_vec4[0] = m_range[0].m_vec4[1] = m_range[0].m_vec4[2] =
         m_range[0].m_vec4[3] = -(std::numeric_limits<GLfloat>::max)();
     m_range[1].m_vec4[0] = m_range[1].m_vec4[1] = m_range[1].m_vec4[2] =
@@ -635,7 +636,8 @@ void ShaderInterface::Parameter::loadData(TIStream &is) {
         (std::numeric_limits<GLint>::max)();
     break;
   case IVEC4:
-    m_default.m_ivec4[0] = m_default.m_ivec4[1] = m_default.m_ivec4[2] = m_default.m_ivec4[3] = 0;
+    m_default.m_ivec4[0] = m_default.m_ivec4[1] = m_default.m_ivec4[2] =
+        m_default.m_ivec4[3]                    = 0;
     m_range[0].m_ivec4[0] = m_range[0].m_ivec4[1] = m_range[0].m_ivec4[2] =
         m_range[0].m_ivec4[3] = -(std::numeric_limits<GLint>::max)();
     m_range[1].m_ivec4[0] = m_range[1].m_ivec4[1] = m_range[1].m_ivec4[2] =

@@ -57,11 +57,11 @@ namespace {
 // Classes
 
 struct ContextLocker {
-  ShadingContext &m_ctx;
+  ShadingContext& m_ctx;
   bool m_locked;
 
 public:
-  ContextLocker(ShadingContext &ctx) : m_ctx(ctx), m_locked(false) { relock(); }
+  ContextLocker(ShadingContext& ctx) : m_ctx(ctx), m_locked(false) { relock(); }
   ~ContextLocker() {
     if (m_locked) unlock();
   }
@@ -78,10 +78,10 @@ public:
 };
 
 struct ProgramBinder {
-  QOpenGLShaderProgram *m_prog;
+  QOpenGLShaderProgram* m_prog;
 
 public:
-  ProgramBinder(QOpenGLShaderProgram *prog) : m_prog(prog) { m_prog->bind(); }
+  ProgramBinder(QOpenGLShaderProgram* prog) : m_prog(prog) { m_prog->bind(); }
   ~ProgramBinder() {
     glUseProgram(0);  // m_prog->release();
   }
@@ -92,7 +92,7 @@ struct RectF {
   RectF(GLfloat x0, GLfloat y0, GLfloat x1, GLfloat y1) {
     m_val[0] = x0, m_val[1] = y0, m_val[2] = x1, m_val[3] = y1;
   }
-  RectF(const TRectD &rect) {
+  RectF(const TRectD& rect) {
     m_val[0] = rect.x0, m_val[1] = rect.y0, m_val[2] = rect.x1,
     m_val[3] = rect.y1;
   }
@@ -100,7 +100,7 @@ struct RectF {
   operator TRectD() const {
     return TRectD(m_val[0], m_val[1], m_val[2], m_val[3]);
   }
-  bool operator==(const RectF &rect) const {
+  bool operator==(const RectF& rect) const {
     return (memcmp(m_val, rect.m_val, sizeof(this)) == 0);
   }
 };
@@ -116,7 +116,7 @@ struct AffineF {
 
 // Global Variables
 
-typedef std::map<QString, ShaderFxDeclaration *> FxDeclarationsMap;
+typedef std::map<QString, ShaderFxDeclaration*> FxDeclarationsMap;
 FxDeclarationsMap l_shaderFxDeclarations;
 
 enum Measures { NONE, PERCENT, LENGTH, ANGLE, MEASURESCOUNT };
@@ -136,17 +136,17 @@ static const TParamUIConcept::Type
 
 // Functions
 
-inline bool isObsolete(const TFilePath &fp, const QDateTime &lastModified) {
+inline bool isObsolete(const TFilePath& fp, const QDateTime& lastModified) {
   QFileInfo fInfo(QString::fromStdWString(fp.getWideString()));
   return (lastModified != fInfo.lastModified());
 }
 
-inline TRectD tileRect(const TTile &tile) {
-  const TDimension &dim = tile.getRaster()->getSize();
+inline TRectD tileRect(const TTile& tile) {
+  const TDimension& dim = tile.getRaster()->getSize();
   return TRectD(tile.m_pos, TDimensionD(dim.lx, dim.ly));
 }
 
-inline void ceilRect(TRectD &rect) {
+inline void ceilRect(TRectD& rect) {
   rect.x0 = tfloor(rect.x0), rect.y0 = tfloor(rect.y0);
   rect.x1 = tceil(rect.x1), rect.y1 = tceil(rect.y1);
 }
@@ -160,7 +160,7 @@ inline void ceilRect(TRectD &rect) {
 class ShaderFx final : public TStandardZeraryFx {
   FX_PLUGIN_DECLARATION(ShaderFx)
 
-  const ShaderInterface *m_shaderInterface;  //!< Shader fx 'description'.
+  const ShaderInterface* m_shaderInterface;  //!< Shader fx 'description'.
   std::vector<boost::any>
       m_params;  //!< Parameters for the shader fx. The actual parameter
                  //!< type depends on the shader interface declaration.
@@ -173,7 +173,7 @@ public:
   ShaderFx() : m_shaderInterface() {
     assert(false);
   }  // Necessary due to TPersist inheritance, but must NOT be used
-  ShaderFx(const ShaderInterface *shaderInterface)
+  ShaderFx(const ShaderInterface* shaderInterface)
       : m_shaderInterface(shaderInterface) {
     initialize();
   }
@@ -181,29 +181,29 @@ public:
   // void setShaderInterface(const ShaderInterface& shaderInterface);
   void initialize();
 
-  void getParamUIs(TParamUIConcept *&params, int &length) override;
-  bool doGetBBox(double frame, TRectD &bBox,
-                 const TRenderSettings &info) override;
-  bool canHandle(const TRenderSettings &info, double frame) override;
+  void getParamUIs(TParamUIConcept*& params, int& length) override;
+  bool doGetBBox(double frame, TRectD& bBox,
+                 const TRenderSettings& info) override;
+  bool canHandle(const TRenderSettings& info, double frame) override;
 
-  void doDryCompute(TRectD &rect, double frame,
-                    const TRenderSettings &ri) override;
-  void doCompute(TTile &tile, double frame, const TRenderSettings &ri) override;
+  void doDryCompute(TRectD& rect, double frame,
+                    const TRenderSettings& ri) override;
+  void doCompute(TTile& tile, double frame, const TRenderSettings& ri) override;
 
 private:
-  QOpenGLShaderProgram *touchShaderProgram(
-      const ShaderInterface::ShaderData &sd, ShadingContext &context,
-      int varyingsCount = 0, const GLchar **varyings = 0);
+  QOpenGLShaderProgram* touchShaderProgram(
+      const ShaderInterface::ShaderData& sd, ShadingContext& context,
+      int varyingsCount = 0, const GLchar** varyings = 0);
 
-  void bindParameters(QOpenGLShaderProgram *shaderProgram, double frame);
+  void bindParameters(QOpenGLShaderProgram* shaderProgram, double frame);
 
-  void bindWorldTransform(QOpenGLShaderProgram *shaderProgram,
-                          const TAffine &worldToDst);
+  void bindWorldTransform(QOpenGLShaderProgram* shaderProgram,
+                          const TAffine& worldToDst);
 
-  void getInputData(const TRectD &rect, double frame, const TRenderSettings &ri,
-                    std::vector<TRectD> &inputRects,
-                    std::vector<TAffine> &inputAffines,
-                    ShadingContext &context);
+  void getInputData(const TRectD& rect, double frame, const TRenderSettings& ri,
+                    std::vector<TRectD>& inputRects,
+                    std::vector<TAffine>& inputAffines,
+                    ShadingContext& context);
 };
 
 //****************************************************************************
@@ -214,12 +214,12 @@ class ShaderFxDeclaration final : public TFxDeclaration {
   ShaderInterface m_shaderInterface;
 
 public:
-  ShaderFxDeclaration(const ShaderInterface &shaderInterface)
+  ShaderFxDeclaration(const ShaderInterface& shaderInterface)
       : TFxDeclaration(
             TFxInfo(shaderInterface.mainShader().m_name.toStdString(), false))
       , m_shaderInterface(shaderInterface) {}
 
-  TPersist *create() const override { return new ShaderFx(&m_shaderInterface); }
+  TPersist* create() const override { return new ShaderFx(&m_shaderInterface); }
 };
 
 //****************************************************************************
@@ -236,17 +236,17 @@ class ShadingContextManager final : public QObject {
 public:
   ShadingContextManager() {
     /*
-The ShadingContext's QOpenGLFramebufferObject must be destroyed *before* the global
-QApplication
-is. So, we will attach to a suitable parent object whose lifespan is shorter.
+The ShadingContext's QOpenGLFramebufferObject must be destroyed *before* the
+global QApplication is. So, we will attach to a suitable parent object whose
+lifespan is shorter.
 
 FYI - yes, this approach was adopted after a long and PAINFUL wrestling session
 with Qt.
 Suggestions are welcome as this is a tad beyond ridiculous...
 */
 
-    QObject *mainScopeBoundObject =
-        QCoreApplication::instance()->findChild<QObject *>("mainScope");
+    QObject* mainScopeBoundObject =
+        QCoreApplication::instance()->findChild<QObject*>("mainScope");
 
     assert(thread() ==
            mainScopeBoundObject
@@ -257,15 +257,15 @@ Suggestions are welcome as this is a tad beyond ridiculous...
     m_shadingContext.reset(new ShadingContext(m_surface.get()));
   }
 
-  static ShadingContextManager *instance() {
-    static ShadingContextManager *theManager = new ShadingContextManager;
+  static ShadingContextManager* instance() {
+    static ShadingContextManager* theManager = new ShadingContextManager;
     return theManager;
   }
 
-  QMutex *mutex() const { return &m_mutex; }
+  QMutex* mutex() const { return &m_mutex; }
 
-  const ShadingContext &shadingContext() const { return *m_shadingContext; }
-  ShadingContext &shadingContext() { return *m_shadingContext; }
+  const ShadingContext& shadingContext() const { return *m_shadingContext; }
+  ShadingContext& shadingContext() { return *m_shadingContext; }
 
   void onRenderInstanceStart() { ++m_activeRenderInstances; }
 
@@ -286,7 +286,7 @@ Suggestions are welcome as this is a tad beyond ridiculous...
 
   ShadingContext::Support touchSupport() {
     struct {
-      ShadingContextManager *m_this;
+      ShadingContextManager* m_this;
       ShadingContext::Support support() {
         QMutexLocker mLocker(&m_this->m_mutex);
         ::ContextLocker cLocker(*m_this->m_shadingContext);
@@ -321,7 +321,7 @@ Suggestions are welcome as this is a tad beyond ridiculous...
     return sup;
   }
 
-  QOffscreenSurface *getSurface() { return m_surface.get(); }
+  QOffscreenSurface* getSurface() { return m_surface.get(); }
 };
 
 template class DV_EXPORT_API TFxDeclarationT<ShaderFx>;
@@ -331,14 +331,14 @@ template class DV_EXPORT_API TFxDeclarationT<ShaderFx>;
 //****************************************************************************
 
 class MessageCreateContext final : public TThread::Message {
-  ShadingContextManager *man;
+  ShadingContextManager* man;
 
 public:
-  MessageCreateContext(ShadingContextManager *ctx) : man(ctx) {}
+  MessageCreateContext(ShadingContextManager* ctx) : man(ctx) {}
 
   void onDeliver() override { man->onRenderInstanceEnd(); }
 
-  TThread::Message *clone() const override {
+  TThread::Message* clone() const override {
     return new MessageCreateContext(*this);
   }
 };
@@ -379,7 +379,7 @@ is scheduling a slot to be executed as soon as event processing starts.
     TFunctorInvoker::instance()->invokeQueued(new InstanceSCM);
   }
 
-  TRenderResourceManager *operator()() override { return new SCMDelegate; }
+  TRenderResourceManager* operator()() override { return new SCMDelegate; }
 };
 
 MANAGER_FILESCOPE_DECLARATION(SCMDelegate, SCMDelegateGenerator)
@@ -390,39 +390,39 @@ MANAGER_FILESCOPE_DECLARATION(SCMDelegate, SCMDelegateGenerator)
 
 void ShaderFx::initialize() {
   struct {
-    ShaderFx *m_this;
+    ShaderFx* m_this;
 
-    inline void addUiConcept(const ShaderInterface::Parameter &siParam,
-                             const TParamP &param) {
+    inline void addUiConcept(const ShaderInterface::Parameter& siParam,
+                             const TParamP& param) {
       if (siParam.m_concept.m_type >= ShaderInterface::UI_CONCEPTS &&
           siParam.m_concept.m_type < ShaderInterface::CONCEPTSCOUNT) {
         m_this->m_uiConcepts.push_back(TParamUIConcept());
 
-        TParamUIConcept &uiConcept = m_this->m_uiConcepts.back();
-        uiConcept.m_type           = ::l_conceptTypes[siParam.m_concept.m_type -
-                                            ShaderInterface::UI_CONCEPTS];
-        uiConcept.m_label          = siParam.m_concept.m_label.toStdString();
+        TParamUIConcept& uiConcept = m_this->m_uiConcepts.back();
+        uiConcept.m_type  = ::l_conceptTypes[siParam.m_concept.m_type -
+                                             ShaderInterface::UI_CONCEPTS];
+        uiConcept.m_label = siParam.m_concept.m_label.toStdString();
         uiConcept.m_params.push_back(param);
       }
     }
 
-    inline void addUiConcept(const ShaderInterface::ParameterConcept &concept) {
-      if (!concept.isUI() || concept.m_parameterNames.empty()) return;
+    inline void addUiConcept(const ShaderInterface::ParameterConcept& siParam) {
+      if (!siParam.isUI() || siParam.m_parameterNames.empty()) return;
 
       TParamUIConcept uiConcept = {
-          ::l_conceptTypes[concept.m_type - ShaderInterface::UI_CONCEPTS],
-          concept.m_label.toStdString()};
+          ::l_conceptTypes[siParam.m_type - ShaderInterface::UI_CONCEPTS],
+          siParam.m_label.toStdString()};
 
-      int n, nCount = int(concept.m_parameterNames.size());
+      int n, nCount = int(siParam.m_parameterNames.size());
       for (n = 0; n != nCount; ++n) {
-        TParam *param = m_this->getParams()->getParam(
-            concept.m_parameterNames[n].toStdString());
+        TParam* param = m_this->getParams()->getParam(
+            siParam.m_parameterNames[n].toStdString());
         if (!param) break;
 
         uiConcept.m_params.push_back(param);
       }
 
-      if (uiConcept.m_params.size() == concept.m_parameterNames.size())
+      if (uiConcept.m_params.size() == siParam.m_parameterNames.size())
         m_this->m_uiConcepts.push_back(uiConcept);
     }
 
@@ -431,14 +431,14 @@ void ShaderFx::initialize() {
   assert(m_params.empty());  // Interfaces should not be re-set
 
   // Allocate parameters following the specified interface
-  const std::vector<ShaderInterface::Parameter> &siParams =
+  const std::vector<ShaderInterface::Parameter>& siParams =
       m_shaderInterface->parameters();
 
   int p, pCount = int(siParams.size());
   m_params.reserve(pCount);
 
   for (p = 0; p != pCount; ++p) {
-    const ShaderInterface::Parameter &siParam = siParams[p];
+    const ShaderInterface::Parameter& siParam = siParams[p];
 
     switch (siParam.m_type) {
     case ShaderInterface::BOOL: {
@@ -565,14 +565,14 @@ void ShaderFx::initialize() {
   }
 
   // Add composite UI concepts
-  const std::vector<ShaderInterface::ParameterConcept> &parConcepts =
+  const std::vector<ShaderInterface::ParameterConcept>& parConcepts =
       m_shaderInterface->m_parConcepts;
 
   int c, cCount = int(parConcepts.size());
   for (c = 0; c != cCount; ++c) locals.addUiConcept(parConcepts[c]);
 
   // Add input ports
-  const std::vector<QString> &inputPorts = m_shaderInterface->inputPorts();
+  const std::vector<QString>& inputPorts = m_shaderInterface->inputPorts();
 
   int i, iCount = int(inputPorts.size());
   m_inputPorts.reserve(iCount);
@@ -585,7 +585,7 @@ void ShaderFx::initialize() {
 
 //-------------------------------------------------------------------
 
-void ShaderFx::getParamUIs(TParamUIConcept *&params, int &length) {
+void ShaderFx::getParamUIs(TParamUIConcept*& params, int& length) {
   length = int(m_uiConcepts.size());
   params = new TParamUIConcept[length];
 
@@ -594,8 +594,8 @@ void ShaderFx::getParamUIs(TParamUIConcept *&params, int &length) {
 
 //-------------------------------------------------------------------
 
-bool ShaderFx::doGetBBox(double frame, TRectD &bbox,
-                         const TRenderSettings &info) {
+bool ShaderFx::doGetBBox(double frame, TRectD& bbox,
+                         const TRenderSettings& info) {
   static const ::RectF infiniteRectF(-(std::numeric_limits<GLfloat>::max)(),
                                      -(std::numeric_limits<GLfloat>::max)(),
                                      (std::numeric_limits<GLfloat>::max)(),
@@ -603,10 +603,10 @@ bool ShaderFx::doGetBBox(double frame, TRectD &bbox,
 
   bbox = TConsts::infiniteRectD;
 
-  const ShaderInterface::ShaderData &sd = m_shaderInterface->bboxShader();
+  const ShaderInterface::ShaderData& sd = m_shaderInterface->bboxShader();
   if (!sd.isValid()) return true;
 
-  ShadingContextManager *manager = ShadingContextManager::instance();
+  ShadingContextManager* manager = ShadingContextManager::instance();
   if (manager->touchSupport() != ShadingContext::OK) return true;
 
   // Remember: info.m_affine MUST NOT BE CONSIDERED in doGetBBox's
@@ -618,14 +618,14 @@ bool ShaderFx::doGetBBox(double frame, TRectD &bbox,
   // ShadingContext& context = manager->shadingContext();
   std::shared_ptr<ShadingContext> shadingContextPtr(
       new ShadingContext(manager->getSurface()));
-  ShadingContext &context = *shadingContextPtr.get();
+  ShadingContext& context = *shadingContextPtr.get();
 
   ::ContextLocker cLocker(context);
 
   // Build the varyings data
-  QOpenGLShaderProgram *prog = 0;
+  QOpenGLShaderProgram* prog = 0;
   {
-    const GLchar *varyingNames[] = {"outputBBox"};
+    const GLchar* varyingNames[] = {"outputBBox"};
     prog = touchShaderProgram(sd, context, 1, &varyingNames[0]);
   }
 
@@ -634,7 +634,7 @@ bool ShaderFx::doGetBBox(double frame, TRectD &bbox,
   std::vector<RectF> inputBBoxes(pCount, ::RectF(TRectD()));
 
   for (int p = 0; p != pCount; ++p) {
-    TRasterFxPort &port = m_inputPorts[p];
+    TRasterFxPort& port = m_inputPorts[p];
     if (port.isConnected()) {
       TRectD inputBBox;
 
@@ -666,7 +666,7 @@ bool ShaderFx::doGetBBox(double frame, TRectD &bbox,
 
     // Perform transform feedback
     const GLsizeiptr varyingSizes[] = {sizeof(::RectF)};
-    GLvoid *bufs[]                  = {bboxF.m_val};
+    GLvoid* bufs[]                  = {bboxF.m_val};
 
     context.transformFeedback(1, varyingSizes, bufs);
   }
@@ -678,7 +678,7 @@ bool ShaderFx::doGetBBox(double frame, TRectD &bbox,
 
 //-------------------------------------------------------------------
 
-bool ShaderFx::canHandle(const TRenderSettings &info, double frame) {
+bool ShaderFx::canHandle(const TRenderSettings& info, double frame) {
   return (m_shaderInterface->hwtType() == ShaderInterface::ANY)
              ? true
              : isAlmostIsotropic(info.m_affine);
@@ -686,30 +686,29 @@ bool ShaderFx::canHandle(const TRenderSettings &info, double frame) {
 
 //-------------------------------------------------------------------
 
-QOpenGLShaderProgram *ShaderFx::touchShaderProgram(
-    const ShaderInterface::ShaderData &sd, ShadingContext &context,
-    int varyingsCount, const GLchar **varyings) {
-  typedef std::pair<QOpenGLShaderProgram *, QDateTime> CompiledShader;
+QOpenGLShaderProgram* ShaderFx::touchShaderProgram(
+    const ShaderInterface::ShaderData& sd, ShadingContext& context,
+    int varyingsCount, const GLchar** varyings) {
+  typedef std::pair<QOpenGLShaderProgram*, QDateTime> CompiledShader;
 
   struct locals {
-    inline static void logCompilation(QOpenGLShaderProgram *program) {
+    inline static void logCompilation(QOpenGLShaderProgram* program) {
       // Log shaders - observe that we'll look into the program's *children*,
       // not its
       // shaders. This is necessary as uncompiled shaders are not added to the
       // program.
-      const QObjectList &children = program->children();
+      const QObjectList& children = program->children();
 
       int c, cCount = children.size();
       for (c = 0; c != cCount; ++c) {
-        if (QOpenGLShader *shader =
-                dynamic_cast<QOpenGLShader *>(children[c])) {
-          const QString &log = shader->log();
+        if (QOpenGLShader* shader = dynamic_cast<QOpenGLShader*>(children[c])) {
+          const QString& log = shader->log();
           if (!log.isEmpty()) DVGui::info(log);
         }
       }
 
       // ShaderProgram linking logs
-      const QString &log = program->log();
+      const QString& log = program->log();
       if (!log.isEmpty()) DVGui::info(log);
     }
   };  // locals
@@ -731,20 +730,20 @@ QOpenGLShaderProgram *ShaderFx::touchShaderProgram(
 
 //-------------------------------------------------------------------
 
-void ShaderFx::bindParameters(QOpenGLShaderProgram *program, double frame) {
+void ShaderFx::bindParameters(QOpenGLShaderProgram* program, double frame) {
   // Bind fx parameters
-  const std::vector<ShaderInterface::Parameter> &siParams =
+  const std::vector<ShaderInterface::Parameter>& siParams =
       m_shaderInterface->parameters();
 
   assert(siParams.size() == m_params.size());
 
   int p, pCount = int(siParams.size());
   for (p = 0; p != pCount; ++p) {
-    const ShaderInterface::Parameter &siParam = siParams[p];
+    const ShaderInterface::Parameter& siParam = siParams[p];
 
     switch (siParam.m_type) {
     case ShaderInterface::BOOL: {
-      const TBoolParamP &param =
+      const TBoolParamP& param =
           *boost::unsafe_any_cast<TBoolParamP>(&m_params[p]);
       program->setUniformValue(siParam.m_name.toUtf8().data(),
                                (GLboolean)param->getValue());
@@ -752,7 +751,7 @@ void ShaderFx::bindParameters(QOpenGLShaderProgram *program, double frame) {
     }
 
     case ShaderInterface::FLOAT: {
-      const TDoubleParamP &param =
+      const TDoubleParamP& param =
           *boost::unsafe_any_cast<TDoubleParamP>(&m_params[p]);
       program->setUniformValue(siParam.m_name.toUtf8().data(),
                                (GLfloat)param->getValue(frame));
@@ -760,17 +759,17 @@ void ShaderFx::bindParameters(QOpenGLShaderProgram *program, double frame) {
     }
 
     case ShaderInterface::VEC2: {
-      const TPointParamP &param =
+      const TPointParamP& param =
           *boost::unsafe_any_cast<TPointParamP>(&m_params[p]);
 
-      const TPointD &value = param->getValue(frame);
+      const TPointD& value = param->getValue(frame);
       program->setUniformValue(siParam.m_name.toUtf8().data(), (GLfloat)value.x,
                                (GLfloat)value.y);
       break;
     }
 
     case ShaderInterface::INT: {
-      const TIntParamP &param =
+      const TIntParamP& param =
           *boost::unsafe_any_cast<TIntParamP>(&m_params[p]);
       program->setUniformValue(siParam.m_name.toUtf8().data(),
                                (GLint)param->getValue());
@@ -779,10 +778,10 @@ void ShaderFx::bindParameters(QOpenGLShaderProgram *program, double frame) {
 
     case ShaderInterface::RGBA:
     case ShaderInterface::RGB: {
-      const TPixelParamP &param =
+      const TPixelParamP& param =
           *boost::unsafe_any_cast<TPixelParamP>(&m_params[p]);
 
-      const TPixel32 &value = param->getValue(frame);
+      const TPixel32& value = param->getValue(frame);
       program->setUniformValue(
           siParam.m_name.toUtf8().data(), (GLfloat)value.r / 255.0f,
           (GLfloat)value.g / 255.0f, (GLfloat)value.b / 255.0f,
@@ -797,8 +796,8 @@ void ShaderFx::bindParameters(QOpenGLShaderProgram *program, double frame) {
 
 //-------------------------------------------------------------------
 
-void ShaderFx::bindWorldTransform(QOpenGLShaderProgram *program,
-                                  const TAffine &worldToDst) {
+void ShaderFx::bindWorldTransform(QOpenGLShaderProgram* program,
+                                  const TAffine& worldToDst) {
   // Bind transformation affine
   float qwToD[9] = {static_cast<float>(worldToDst.a11),
                     static_cast<float>(worldToDst.a12),
@@ -811,7 +810,7 @@ void ShaderFx::bindWorldTransform(QOpenGLShaderProgram *program,
                     1.0f};
   program->setUniformValue("worldToOutput", QMatrix3x3(qwToD));
 
-  const TAffine &dToW = worldToDst.inv();
+  const TAffine& dToW = worldToDst.inv();
   float qdToW[9]      = {static_cast<float>(dToW.a11),
                          static_cast<float>(dToW.a12),
                          static_cast<float>(dToW.a13),
@@ -826,20 +825,20 @@ void ShaderFx::bindWorldTransform(QOpenGLShaderProgram *program,
 
 //-------------------------------------------------------------------
 
-void ShaderFx::getInputData(const TRectD &rect, double frame,
-                            const TRenderSettings &ri,
-                            std::vector<TRectD> &inputRects,
-                            std::vector<TAffine> &inputAffines,
-                            ShadingContext &context) {
+void ShaderFx::getInputData(const TRectD& rect, double frame,
+                            const TRenderSettings& ri,
+                            std::vector<TRectD>& inputRects,
+                            std::vector<TAffine>& inputAffines,
+                            ShadingContext& context) {
   struct locals {
-    static inline void addNames(std::vector<std::string> &names,
-                                const char *prefix, int pCount) {
+    static inline void addNames(std::vector<std::string>& names,
+                                const char* prefix, int pCount) {
       for (int p = 0; p != pCount; ++p)
         names.push_back((prefix + QString("[%1]").arg(p)).toStdString());
     }
   };
 
-  const ShaderInterface::ShaderData &sd = m_shaderInterface->inputPortsShader();
+  const ShaderInterface::ShaderData& sd = m_shaderInterface->inputPortsShader();
   if (!sd.isValid()) {
     inputRects.resize(getInputPortCount());
     std::fill(inputRects.begin(), inputRects.end(), rect);
@@ -857,15 +856,15 @@ void ShaderFx::getInputData(const TRectD &rect, double frame,
   int pCount = getInputPortCount();
 
   // Build the varyings data
-  QOpenGLShaderProgram *prog = 0;
+  QOpenGLShaderProgram* prog = 0;
   {
     // Unsubscripted varying arrays on transform feedback seems to be
     // unsupported
     // on ATI cards. We have to declare EACH array name - e.g. inputRect[0],
     // intputRect[1], etc..
 
-    const GLchar *varyingPrefixes[] = {"inputRect", "worldToInput"};
-    const int varyingsCount = sizeof(varyingPrefixes) / sizeof(GLchar *);
+    const GLchar* varyingPrefixes[] = {"inputRect", "worldToInput"};
+    const int varyingsCount         = sizeof(varyingPrefixes) / sizeof(GLchar*);
 
     std::vector<std::string> varyingStrings;
     varyingStrings.reserve(varyingsCount);
@@ -876,12 +875,12 @@ void ShaderFx::getInputData(const TRectD &rect, double frame,
 #if defined(__APPLE_CC__)
     /* OSX10.8 の clang -stdlib=libc++ だと link 時 &std::string::c_str が
      * undefined になってしまう */
-    std::vector<const GLchar *> varyingNames(varyingStrings.size());
-    auto conv = [](const std::string &i) { return i.c_str(); };
+    std::vector<const GLchar*> varyingNames(varyingStrings.size());
+    auto conv = [](const std::string& i) { return i.c_str(); };
     std::transform(varyingStrings.begin(), varyingStrings.end(),
                    varyingNames.begin(), conv);
 #else
-    std::vector<const GLchar *> varyingNames(
+    std::vector<const GLchar*> varyingNames(
         boost::make_transform_iterator(varyingStrings.begin(),
                                        std::mem_fn(&std::string::c_str)),
         boost::make_transform_iterator(varyingStrings.end(),
@@ -909,7 +908,7 @@ void ShaderFx::getInputData(const TRectD &rect, double frame,
     // Perform transform feedback
     const GLsizeiptr varyingSizes[] = {
         static_cast<GLsizeiptr>(bufFloatsCount * sizeof(GLfloat))};
-    GLvoid *bufs[] = {&buf[0]};
+    GLvoid* bufs[] = {&buf[0]};
 
     context.transformFeedback(1, varyingSizes, bufs);
 
@@ -921,35 +920,35 @@ void ShaderFx::getInputData(const TRectD &rect, double frame,
   }
 
   // Finalize output
-  const RectF *rBufBegin(reinterpret_cast<const RectF *>(&buf[0])),
+  const RectF *rBufBegin(reinterpret_cast<const RectF*>(&buf[0])),
       *rBufEnd(rBufBegin + pCount);
   std::copy(rBufBegin, rBufEnd, &inputRects[0]);
 
-  const AffineF *aBufBegin(reinterpret_cast<const AffineF *>(rBufEnd)),
+  const AffineF *aBufBegin(reinterpret_cast<const AffineF*>(rBufEnd)),
       *aBufEnd(aBufBegin + pCount);
   std::copy(aBufBegin, aBufEnd, &inputAffines[0]);
 }
 
 //-------------------------------------------------------------------
 
-void ShaderFx::doCompute(TTile &tile, double frame,
-                         const TRenderSettings &info) {
+void ShaderFx::doCompute(TTile& tile, double frame,
+                         const TRenderSettings& info) {
   struct locals {
     struct TexturesStorage {
-      ShadingContext &m_ctx;
+      ShadingContext& m_ctx;
       std::vector<GLuint> m_texIds;
 
-      TexturesStorage(ShadingContext &ctx, int pCount) : m_ctx(ctx) {
+      TexturesStorage(ShadingContext& ctx, int pCount) : m_ctx(ctx) {
         m_texIds.reserve(pCount);
       }
 
       ~TexturesStorage() {
-        for (auto const &texId : m_texIds) {
+        for (auto const& texId : m_texIds) {
           m_ctx.unloadTexture(texId);
         }
       }
 
-      void load(const TRasterP &ras, GLuint texUnit) {
+      void load(const TRasterP& ras, GLuint texUnit) {
         if (ras) m_texIds.push_back(m_ctx.loadTexture(ras, texUnit));
       }
     };
@@ -960,12 +959,12 @@ void ShaderFx::doCompute(TTile &tile, double frame,
       return fmt;
     }
 
-    inline static void touchOutputSize(ShadingContext &context,
-                                       const TDimension &size, int bpp) {
-      const QOpenGLFramebufferObjectFormat &fmt = makeFormat(bpp);
+    inline static void touchOutputSize(ShadingContext& context,
+                                       const TDimension& size, int bpp) {
+      const QOpenGLFramebufferObjectFormat& fmt = makeFormat(bpp);
 
-      const TDimension &currentSize                    = context.size();
-      const QOpenGLFramebufferObjectFormat &currentFmt = context.format();
+      const TDimension& currentSize                    = context.size();
+      const QOpenGLFramebufferObjectFormat& currentFmt = context.format();
 
       if (currentSize.lx < size.lx || currentSize.ly < size.ly ||
           currentFmt != fmt)
@@ -974,7 +973,7 @@ void ShaderFx::doCompute(TTile &tile, double frame,
     }
   };  // locals
 
-  ShadingContextManager *manager = ShadingContextManager::instance();
+  ShadingContextManager* manager = ShadingContextManager::instance();
   if (manager->touchSupport() != ShadingContext::OK) return;
 
   QMutexLocker mLocker(
@@ -982,12 +981,12 @@ void ShaderFx::doCompute(TTile &tile, double frame,
                           // lock the full-scale mutex
   std::shared_ptr<ShadingContext> shadingContextPtr(
       new ShadingContext(manager->getSurface()));
-  ShadingContext &context = *shadingContextPtr.get();
+  ShadingContext& context = *shadingContextPtr.get();
   // ShadingContext& context = manager->shadingContext();
 
   int pCount = getInputPortCount();
 
-  const TRectD &tileRect = ::tileRect(tile);
+  const TRectD& tileRect = ::tileRect(tile);
 
   std::vector<TRectD> inputRects(pCount);
   std::vector<TAffine> inputAffines(pCount);
@@ -1007,10 +1006,10 @@ void ShaderFx::doCompute(TTile &tile, double frame,
     mLocker.unlock();
 
     for (int p = 0; p != pCount; ++p) {
-      TRasterFxPort &port = m_inputPorts[p];
+      TRasterFxPort& port = m_inputPorts[p];
       if (port.isConnected()) {
         // Compute input tile
-        TRectD &inRect = inputRects[p];
+        TRectD& inRect = inputRects[p];
         if (inRect.getLx() > 0.0 && inRect.getLy() > 0.0) {
           ::ceilRect(inRect);
 
@@ -1018,7 +1017,7 @@ void ShaderFx::doCompute(TTile &tile, double frame,
           inputInfo.m_affine = inputAffines[p];
 
 #ifdef TRANSFORM_FEEDBACK_COUT
-          const TAffine &inAff = inputAffines[p];
+          const TAffine& inAff = inputAffines[p];
           std::cout << "inRect " << p << ": " << inRect.x0 << " " << inRect.y0
                     << " " << inRect.x1 << " " << inRect.y1 << "\n";
           std::cout << "inAff  " << p << ": " << inAff.a11 << " " << inAff.a12
@@ -1051,7 +1050,7 @@ void ShaderFx::doCompute(TTile &tile, double frame,
   {
     locals::touchOutputSize(context, tile.getRaster()->getSize(), info.m_bpp);
 
-    QOpenGLShaderProgram *program =
+    QOpenGLShaderProgram* program =
         touchShaderProgram(m_shaderInterface->mainShader(), context);
     {
       ProgramBinder binder(program);
@@ -1123,9 +1122,9 @@ void ShaderFx::doCompute(TTile &tile, double frame,
 
 //-------------------------------------------------------------------
 
-void ShaderFx::doDryCompute(TRectD &rect, double frame,
-                            const TRenderSettings &info) {
-  ShadingContextManager *manager = ShadingContextManager::instance();
+void ShaderFx::doDryCompute(TRectD& rect, double frame,
+                            const TRenderSettings& info) {
+  ShadingContextManager* manager = ShadingContextManager::instance();
   if (manager->touchSupport() != ShadingContext::OK) return;
 
   QMutexLocker mLocker(manager->mutex());
@@ -1133,7 +1132,7 @@ void ShaderFx::doDryCompute(TRectD &rect, double frame,
   // ShadingContext& context = manager->shadingContext();
   std::shared_ptr<ShadingContext> shadingContextPtr(
       new ShadingContext(manager->getSurface()));
-  ShadingContext &context = *shadingContextPtr.get();
+  ShadingContext& context = *shadingContextPtr.get();
 
   int pCount = getInputPortCount();
   if (pCount > 0) {
@@ -1145,9 +1144,9 @@ void ShaderFx::doDryCompute(TRectD &rect, double frame,
     getInputData(rect, frame, info, inputRects, inputAffines, context);
 
     for (int p = 0; p != pCount; ++p) {
-      TRasterFxPort &port = m_inputPorts[p];
+      TRasterFxPort& port = m_inputPorts[p];
       if (port.isConnected()) {
-        TRectD &inRect = inputRects[p];
+        TRectD& inRect = inputRects[p];
         if (inRect.getLx() > 0.0 && inRect.getLy() > 0.0) {
           ::ceilRect(inRect);
 
@@ -1169,7 +1168,7 @@ void ShaderFx::doDryCompute(TRectD &rect, double frame,
 
 //------------------------------------------------------------------
 
-const TPersistDeclaration *ShaderFx::getDeclaration() const {
+const TPersistDeclaration* ShaderFx::getDeclaration() const {
   FxDeclarationsMap::iterator it =
       ::l_shaderFxDeclarations.find(m_shaderInterface->mainShader().m_name);
 
@@ -1180,7 +1179,7 @@ const TPersistDeclaration *ShaderFx::getDeclaration() const {
 //    Shader Interfaces  loading function
 //****************************************************************************
 
-void loadShaderInterfaces(const TFilePath &shadersFolder) {
+void loadShaderInterfaces(const TFilePath& shadersFolder) {
   // Scan the shaders folder for xml (shader interface) files
   QDir shadersDir(QString::fromStdWString(shadersFolder.getWideString()));
 

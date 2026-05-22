@@ -639,7 +639,7 @@ void LipSyncPopup::playSound() {
             sc->getOverallSoundTrack(r0, r1)->getDuration() * 1000;
         sc->play(r0);
         m_playButton->setIcon(m_stopIcon);
-        QTimer::singleShot(duration, [=]() {
+        QTimer::singleShot(duration, [=, this]() {
           sc->stop();
           m_playButton->setIcon(m_playIcon);
         });
