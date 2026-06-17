@@ -3,7 +3,7 @@ set(CMAKE_POLICY_DEFAULT_CMP0141 NEW)
 
 cmake_minimum_required(VERSION 2.8.11)
 
-set(CMAKE_BUILD_TYPE_INIT Release)
+set(CMAKE_BUILD_TYPE_INIT Debug)
 
 project(Tahoma2D)
 
